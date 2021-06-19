@@ -1,290 +1,387 @@
 ---
-title: Configure a Point-to-Site VPN gateway connection to virtual network using the Resource Manager deployment model | Microsoft Docs
-description: Securely connect to your Azure Virtual Network by creating a Point-to-Site VPN gateway connection.
+title: 'Connect to a VNet from a computer - P2S VPN and Azure certificate authentication: PowerShell'
+description: Learn how to connect Windows and macOS clients securely to Azure virtual network using P2S and self-signed or CA issued certificates.
+titleSuffix: Azure VPN Gateway
 services: vpn-gateway
-documentationcenter: na
 author: cherylmc
-manager: carmonm
-editor: ''
-tags: azure-resource-manager
 
-ms.assetid: 3eddadf6-2e96-48c4-87c6-52a146faeec6
 ms.service: vpn-gateway
-ms.devlang: na
-ms.topic: hero-article
-ms.tgt_pltfrm: na
-ms.workload: infrastructure-services
-ms.date: 10/17/2016
-ms.author: cherylmc
+ms.topic: how-to
+ms.date: 06/03/2021
+ms.author: cherylmc 
+ms.custom: devx-track-azurepowershell
 
 ---
-# Configure a Point-to-Site connection to a VNet using PowerShell
-> [!div class="op_single_selector"]
-> * [Resource Manager - Azure Portal](vpn-gateway-howto-point-to-site-resource-manager-portal.md)
-> * [Resource Manager - PowerShell](vpn-gateway-howto-point-to-site-rm-ps.md)
-> * [Classic - Azure Portal](vpn-gateway-howto-point-to-site-classic-azure-portal.md)
-> 
-> 
+# Configure a Point-to-Site VPN connection to a VNet using Azure certificate authentication: PowerShell
 
-A Point-to-Site (P2S) configuration lets you create a secure connection from an individual client computer to a virtual network. A P2S connection is useful when you want to connect to your VNet from a remote location, such as from home or a conference, or when you only have a few clients that need to connect to a virtual network. 
+This article helps you securely connect individual clients running Windows, Linux, or macOS to an Azure VNet. Point-to-site VPN connections are useful when you want to connect to your VNet from a remote location, such when you are telecommuting from home or a conference. You can also use P2S instead of a Site-to-Site VPN when you have only a few clients that need to connect to a VNet. Point-to-site connections do not require a VPN device or a public-facing IP address. P2S creates the VPN connection over either SSTP (Secure Socket Tunneling Protocol), or IKEv2.
 
-Point-to-Site connections do not require a VPN device or a public-facing IP address to work. A VPN connection is established by starting the connection from the client computer. For more information about Point-to-Site connections, see the [VPN Gateway FAQ](vpn-gateway-vpn-faq.md#point-to-site-connections) and [Planning and Design](vpn-gateway-plan-design.md). 
+:::image type="content" source="./media/vpn-gateway-how-to-point-to-site-rm-ps/point-to-site-diagram.png" alt-text="Connect from a computer to an Azure VNet - point-to-site connection diagram":::
 
-This article walks you through creating a VNet with a Point-to-Site connection in the Resource Manager deployment model using PowerShell.
+For more information about point-to-site VPN, see [About point-to-site VPN](point-to-site-about.md). To create this configuration using the Azure portal, see [Configure a point-to-site VPN using the Azure portal](vpn-gateway-howto-point-to-site-resource-manager-portal.md).
 
-### Deployment models and methods for P2S connections
-[!INCLUDE [deployment models](../../includes/vpn-gateway-deployment-models-include.md)]
+[!INCLUDE [P2S basic architecture](../../includes/vpn-gateway-p2s-architecture.md)]
 
-The following table shows the two deployment models and available deployment methods for P2S configurations. When an article with configuration steps is available, we link directly to it from this table.
+## Prerequisites
 
-[!INCLUDE [vpn-gateway-clasic-rm](../../includes/vpn-gateway-table-point-to-site-include.md)]
+Verify that you have an Azure subscription. If you don't already have an Azure subscription, you can activate your [MSDN subscriber benefits](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details) or sign up for a [free account](https://azure.microsoft.com/pricing/free-trial).
 
-## Basic workflow
-![Point-to-Site-diagram](./media/vpn-gateway-howto-point-to-site-rm-ps/p2srm.png "point-to-site")
+### Azure PowerShell
 
-In this scenario, you will create a virtual network with a Point-to-Site connection. The instructions will also help you generate certificates, which are required for this configuration. A P2S connection is composed of the following items: A VNet with a VPN gateway, a root certificate .cer file (public key), a client certificate, and the VPN configuration on the client. 
+>[!IMPORTANT]
+> Many of the steps in this article can use the Azure Cloud Shell. However, you can't use Cloud Shell to generate certificates. Additionally, to upload the root certificate public key, you must either use Azure PowerShell locally, or the Azure portal.
+>
 
-We use the following values for this configuration. We set the variables in section [1](#declare) of the article. You can either use the steps as a walk-through and use the values without changing them, or change them to reflect your environment. 
+[!INCLUDE [PowerShell](../../includes/vpn-gateway-cloud-shell-powershell-about.md)]
 
-### <a name="example"></a>Example values
-* **Name: VNet1**
-* **Address space: 192.168.0.0/16** and **10.254.0.0/16**<br>For this example, we use more than one address space to illustrate that this configuration will work with multiple address spaces. However, multiple address spaces are not required for this configuration.
-* **Subnet name: FrontEnd**
-  * **Subnet address range: 192.168.1.0/24**
-* **Subnet name: BackEnd**
-  * **Subnet address range: 10.254.1.0/24**
-* **Subnet name: GatewaySubnet**<br>The Subnet name *GatewaySubnet* is mandatory for the VPN gateway to work.
-  * **Subnet address range: 192.168.200.0/24** 
-* **VPN client address pool: 172.16.201.0/24**<br>VPN clients that connect to the VNet using this Point-to-Site connection receive an IP address from the VPN client address pool.
-* **Subscription:** If you have more than one subscription, verify that you are using the correct one.
-* **Resource Group: TestRG**
-* **Location: East US**
-* **DNS Server: IP address** of the DNS server that you want to use for name resolution.
-* **GW Name: Vnet1GW**
-* **Public IP name: VNet1GWPIP**
-* **VpnType: RouteBased**
+## <a name="signin"></a>Sign in
 
-## Before beginning
-* Verify that you have an Azure subscription. If you don't already have an Azure subscription, you can activate your [MSDN subscriber benefits](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details) or sign up for a [free account](https://azure.microsoft.com/pricing/free-trial).
-* Install the latest version of the Azure Resource Manager PowerShell cmdlets. See [How to install and configure Azure PowerShell](../powershell-install-configure.md) for more information about installing the PowerShell cmdlets. When working with PowerShell for this configuration, make sure that you are running as administrator. 
+[!INCLUDE [sign in](../../includes/vpn-gateway-cloud-shell-ps-login.md)]
 
-## <a name="declare"></a>Part 1 - Log in and set variables
-In this section, you log in and declare the values used for this configuration. The declared values are used in the sample scripts. Change the values to reflect your own environment. Or, you can use the declared values and go through the steps as an exercise.
+## <a name="declare"></a>Declare variables
 
-1. In the PowerShell console, log in to your Azure account. This cmdlet prompts you for the login credentials for your Azure Account. After logging in, it downloads your account settings so that they are available to Azure PowerShell.
-   
-        Login-AzureRmAccount 
-2. Get a list of your Azure subscriptions.
-   
-        Get-AzureRmSubscription
-3. Specify the subscription that you want to use. 
-   
-        Select-AzureRmSubscription -SubscriptionName "Name of subscription"
-4. Declare the variables that you want to use. Use the following sample, substituting the values for your own when necessary.
-   
-        $VNetName  = "VNet1"
-        $FESubName = "FrontEnd"
-        $BESubName = "Backend"
-        $GWSubName = "GatewaySubnet"
-        $VNetPrefix1 = "192.168.0.0/16"
-        $VNetPrefix2 = "10.254.0.0/16"
-        $FESubPrefix = "192.168.1.0/24"
-        $BESubPrefix = "10.254.1.0/24"
-        $GWSubPrefix = "192.168.200.0/26"
-        $VPNClientAddressPool = "172.16.201.0/24"
-        $RG = "TestRG"
-        $Location = "East US"
-        $DNS = "8.8.8.8"
-        $GWName = "VNet1GW"
-        $GWIPName = "VNet1GWPIP"
-        $GWIPconfName = "gwipconf"
+We use variables for this article so that you can easily change the values to apply to your own environment without having to change the examples themselves. Declare the variables that you want to use. You can use the following sample, substituting the values for your own when necessary. If you close your PowerShell/Cloud Shell session at any point during the exercise, just copy and paste the values again to re-declare the variables.
 
-## <a name="ConfigureVNet"></a>Part 2 - Configure a VNet
+```azurepowershell-interactive
+$VNetName  = "VNet1"
+$FESubName = "FrontEnd"
+$GWSubName = "GatewaySubnet"
+$VNetPrefix = "10.1.0.0/16"
+$FESubPrefix = "10.1.0.0/24"
+$GWSubPrefix = "10.1.255.0/27"
+$VPNClientAddressPool = "172.16.201.0/24"
+$RG = "TestRG1"
+$Location = "EastUS"
+$GWName = "VNet1GW"
+$GWIPName = "VNet1GWpip"
+$GWIPconfName = "gwipconf"
+$DNS = "10.2.1.4"
+```
+
+## <a name="ConfigureVNet"></a>Create a VNet
+
 1. Create a resource group.
-   
-        New-AzureRmResourceGroup -Name $RG -Location $Location
-2. Create the subnet configurations for the virtual network, naming them *FrontEnd*, *BackEnd*, and *GatewaySubnet*. These prefixes must be part of the VNet address space that you declared.
-   
-        $fesub = New-AzureRmVirtualNetworkSubnetConfig -Name $FESubName -AddressPrefix $FESubPrefix
-        $besub = New-AzureRmVirtualNetworkSubnetConfig -Name $BESubName -AddressPrefix $BESubPrefix
-        $gwsub = New-AzureRmVirtualNetworkSubnetConfig -Name $GWSubName -AddressPrefix $GWSubPrefix
-3. Create the virtual network. The DNS server specified should be a DNS server that can resolve the names for the resources you are connecting to. For this example, we used a public IP address. Be sure to use your own values.
-   
-        New-AzureRmVirtualNetwork -Name $VNetName -ResourceGroupName $RG -Location $Location -AddressPrefix $VNetPrefix1,$VNetPrefix2 -Subnet $fesub, $besub, $gwsub -DnsServer $DNS
-4. Specify the variables for the virtual network you created.
-   
-        $vnet = Get-AzureRmVirtualNetwork -Name $VNetName -ResourceGroupName $RG
-        $subnet = Get-AzureRmVirtualNetworkSubnetConfig -Name "GatewaySubnet" -VirtualNetwork $vnet
-5. Request a dynamically assigned public IP address. This IP address is necessary for the gateway to work properly. You later connect the gateway to the gateway IP configuration.
-   
-        $pip = New-AzureRmPublicIpAddress -Name $GWIPName -ResourceGroupName $RG -Location $Location -AllocationMethod Dynamic
-        $ipconf = New-AzureRmVirtualNetworkGatewayIpConfig -Name $GWIPconfName -Subnet $subnet -PublicIpAddress $pip
 
-## <a name="Certificates"></a>Part 3 - Certificates
-Certificates are used by Azure to authenticate VPN clients for Point-to-Site VPNs. You export public certificate data (not the private key) as a Base-64 encoded X.509 .cer file from either a root certificate generated by an enterprise certificate solution, or a self-signed root certificate. You then import the public certificate data from the root certificate to Azure. Additionally, you need to generate a client certificate from the root certificate for clients. Each client that wants to connect to the virtual network using a P2S connection must have a client certificate installed that was generated from the root certificate.
+   ```azurepowershell-interactive
+   New-AzResourceGroup -Name $RG -Location $Location
+   ```
 
-### <a name="cer"></a>1. Obtain the .cer file for the root certificate
-You will need to get the public certificate data for the root certificate that you want to use.
+1. Create the subnet configurations for the virtual network, naming them *FrontEnd* and *GatewaySubnet*. These prefixes must be part of the VNet address space that you declared.
 
-* If you are using an enterprise certificate system, obtain the .cer file for the root certificate that you want to use. 
-* If you are not using an enterprise certificate solution, you need to generate a self-signed root certificate. For Windows 10 steps, you can refer to [Working with self-signed root certificates for Point-to-Site configurations](vpn-gateway-certificates-point-to-site.md).
+   ```azurepowershell-interactive
+   $fesub = New-AzVirtualNetworkSubnetConfig -Name $FESubName -AddressPrefix $FESubPrefix
+   $gwsub = New-AzVirtualNetworkSubnetConfig -Name $GWSubName -AddressPrefix $GWSubPrefix
+   ```
 
-1. To obtain a .cer file from a certificate, open **certmgr.msc** and locate the root certificate. Right-click the self-signed root certificate, click **all tasks**, and then click **export**. This opens the **Certificate Export Wizard**.
-2. In the Wizard, click **Next**, select **No, do not export the private key**, and then click **Next**.
-3. On the **Export File Format** page, select **Base-64 encoded X.509 (.CER).** Then, click **Next**. 
-4. On the **File to Export**, **Browse** to the location to which you want to export the certificate. For **File name**, name the certificate file. Then click **Next**.
-5. Click **Finish** to export the certificate.
+1. Create the virtual network.
 
-### <a name="generate"></a>2. Generate the client certificate
-Next, generate the client certificates. You can either generate a unique certificate for each client that will connect, or you can use the same certificate on multiple clients. The advantage to generating unique client certificates is the ability to revoke a single certificate if needed. Otherwise, if everyone is using the same client certificate and you find that you need to revoke the certificate for one client, you will need to generate and install new certificates for all of the clients that use the certificate to authenticate. The client certificates are installed on each client computer later in this exercise.
+   In this example, the -DnsServer server parameter is optional. Specifying a value does not create a new DNS server. The DNS server IP address that you specify should be a DNS server that can resolve the names for the resources you are connecting to from your VNet. This example uses a private IP address, but it is likely that this is not the IP address of your DNS server. Be sure to use your own values. The value you specify is used by the resources that you deploy to the VNet, not by the P2S connection or the VPN client.
 
-* If you are using an enterprise certificate solution, generate a client certificate with the common name value format 'name@yourdomain.com', rather than the NetBIOS 'DOMAIN\username' format. 
-* If you are using a self-signed certificate, see [Working with self-signed root certificates for Point-to-Site configurations](vpn-gateway-certificates-point-to-site.md) to generate a client certificate.
+   ```azurepowershell-interactive
+       New-AzVirtualNetwork `
+      -ResourceGroupName $RG `
+      -Location $Location `
+      -Name $VNetName `
+      -AddressPrefix $VNetPrefix `
+      -Subnet $fesub, $gwsub `
+      -DnsServer $DNS
+   ```
 
-### <a name="exportclientcert"></a>3. Export the client certificate
-A client certificate is required for authentication. After generating the client certificate, export it. The client certificate you export will be installed later on each client computer.
+1. Specify the variables for the virtual network you created.
 
-1. To export a client certificate, you can use *certmgr.msc*. Right-click the client certificate that you want to export, click **all tasks**, and then click **export**.
-2. Export the client certificate with the private key. This is a *.pfx* file. Make sure to record or remember the password (key) that you set for this certificate.
+   ```azurepowershell-interactive
+   $vnet = Get-AzVirtualNetwork -Name $VNetName -ResourceGroupName $RG
+   $subnet = Get-AzVirtualNetworkSubnetConfig -Name "GatewaySubnet" -VirtualNetwork $vnet
+   ```
 
-### <a name="upload"></a>4. Upload the root certificate .cer file
-Declare the variable for your certificate name, replacing the value with your own:
+1. A VPN gateway must have a Public IP address. You first request the IP address resource, and then refer to it when creating your virtual network gateway. The IP address is dynamically assigned to the resource when the VPN gateway is created. VPN Gateway currently only supports *Dynamic* Public IP address allocation. You cannot request a Static Public IP address assignment. However, it doesn't mean that the IP address changes after it has been assigned to your VPN gateway. The only time the Public IP address changes is when the gateway is deleted and re-created. It doesn't change across resizing, resetting, or other internal maintenance/upgrades of your VPN gateway.
 
-        $P2SRootCertName = "Mycertificatename.cer"
+   Request a dynamically assigned public IP address.
 
-Add the public certificate data for the root certificate to Azure. You can upload files for up to 20 root certificates. You do not upload the private key for the root certificate to Azure. Once the .cer file is uploaded, Azure uses it to authenticate clients that connect to the virtual network. 
+   ```azurepowershell-interactive
+   $pip = New-AzPublicIpAddress -Name $GWIPName -ResourceGroupName $RG -Location $Location -AllocationMethod Dynamic
+   $ipconf = New-AzVirtualNetworkGatewayIpConfig -Name $GWIPconfName -Subnet $subnet -PublicIpAddress $pip
+   ```
 
-Replace the file path with your own, and then run the cmdlets.
+## <a name="creategateway"></a>Create the VPN gateway
 
-        $filePathForCert = "C:\cert\Mycertificatename.cer"
-        $cert = new-object System.Security.Cryptography.X509Certificates.X509Certificate2($filePathForCert)
-        $CertBase64 = [system.convert]::ToBase64String($cert.RawData)
-        $p2srootcert = New-AzureRmVpnClientRootCertificate -Name $P2SRootCertName -PublicCertData $CertBase64
+In this step, you configure and create the virtual network gateway for your VNet.
 
-## <a name="creategateway"></a>Part 4 - Create the VPN gateway
-Configure and create the virtual network gateway for your VNet. The *-GatewayType* must be **Vpn** and the *-VpnType* must be **RouteBased**. This can take up to 45 minutes to complete.
+* The -GatewayType must be **Vpn** and the -VpnType must be **RouteBased**.
+* The -VpnClientProtocol is used to specify the types of tunnels that you would like to enable. The  tunnel options are **OpenVPN, SSTP**, and **IKEv2**. You can choose to enable one of them or any supported combination. If you want to enable multiple types, then specify the names separated by a comma. OpenVPN and SSTP cannot be enabled together. The strongSwan client on Android and Linux and the native IKEv2 VPN client on iOS and macOS will use only the IKEv2 tunnel to connect. Windows clients try IKEv2 first and if that doesn’t connect, they fall back to SSTP. You can use the OpenVPN client to connect to OpenVPN tunnel type.
+* The virtual network gateway 'Basic' SKU does not support IKEv2, OpenVPN, or RADIUS authentication. If you are planning on having Mac clients connect to your virtual network, do not use the Basic SKU.
+* A VPN gateway can take up to 45 minutes to complete, depending on the [gateway sku](vpn-gateway-about-vpn-gateway-settings.md) you select. This example uses IKEv2.
 
-        New-AzureRmVirtualNetworkGateway -Name $GWName -ResourceGroupName $RG `
-        -Location $Location -IpConfigurations $ipconf -GatewayType Vpn `
-        -VpnType RouteBased -EnableBgp $false -GatewaySku Standard `
-        -VpnClientAddressPool $VPNClientAddressPool -VpnClientRootCertificates $p2srootcert
+1. Configure and create the virtual network gateway for your VNet. It takes approximately 45 minutes for the gateway to create.
 
-## <a name="clientconfig"></a>Part 5 - Download the VPN client configuration package
-Clients connecting to Azure using P2S must have both a client certificate and a VPN client configuration package installed. VPN client configuration packages are available for Windows clients. The VPN client package contains information to configure the VPN client software that is built into Windows and is specific to the VPN that you want to connect to. The package does not install additional software. See the [VPN Gateway FAQ](vpn-gateway-vpn-faq.md#point-to-site-connections) for more information.
+   ```azurepowershell-interactive
+   New-AzVirtualNetworkGateway -Name $GWName -ResourceGroupName $RG `
+   -Location $Location -IpConfigurations $ipconf -GatewayType Vpn `
+   -VpnType RouteBased -EnableBgp $false -GatewaySku VpnGw1 -VpnClientProtocol "IKEv2"
+   ```
 
-1. After the gateway has been created, you can download the client configuration package. This example downloads the package for 64-bit clients. If you want to download the 32-bit client, replace 'Amd64' with 'x86'. You can also download the VPN client by using the Azure portal.
-   
-        Get-AzureRmVpnClientPackage -ResourceGroupName $RG `
-        -VirtualNetworkGatewayName $GWName -ProcessorArchitecture Amd64
-2. The PowerShell cmdlet returns a URL link. This is an example of what the returned URL looks like:
-   
-        "https://mdsbrketwprodsn1prod.blob.core.windows.net/cmakexe/4a431aa7-b5c2-45d9-97a0-859940069d3f/amd64/4a431aa7-b5c2-45d9-97a0-859940069d3f.exe?sv=2014-02-14&sr=b&sig=jSNCNQ9aUKkCiEokdo%2BqvfjAfyhSXGnRG0vYAv4efg0%3D&st=2016-01-08T07%3A10%3A08Z&se=2016-01-08T08%3A10%3A08Z&sp=r&fileExtension=.exe"
-3. Copy and paste the link that is returned to a web browser to download the package. Then install the package on the client computer. If you get a SmartScreen popup, click **More info**, then **Run anyway** in order to install the package.
-4. On the client computer, navigate to **Network Settings** and click **VPN**. You will see the connection listed. It will show the name of the virtual network that it will connect to and looks similar to this example: 
-   
-    ![VPN client](./media/vpn-gateway-howto-point-to-site-rm-ps/vpn.png "VPN client")
+1. Once your gateway is created, you can view it using the following example. If you closed PowerShell or it timed out while your gateway was being created, you can [declare your variables](#declare) again.
 
-## <a name="clientcertificate"></a>Part 6 - Install the client certificate
-Each client computer must have a client certificate in order to authenticate. When installing the client certificate, you will need the password that was created when the client certificate was exported.
+   ```azurepowershell-interactive
+   Get-AzVirtualNetworkGateway -Name $GWName -ResourceGroup $RG
+   ```
 
-1. Copy the .pfx file to the client computer.
-2. Double-click the .pfx file to install it. Do not modify the installation location.
+## <a name="addresspool"></a>Add the VPN client address pool
 
-## <a name="connect"></a>Part 7 - Connect to Azure
-1. To connect to your VNet, on the client computer, navigate to VPN connections and locate the VPN connection that you created. It is named the same name as your virtual network. Click **Connect**. A pop-up message may appear that refers to using the certificate. If this happens, click **Continue** to use elevated privileges. 
-2. On the **Connection** status page, click **Connect** to start the connection. If you see a **Select Certificate** screen, verify that the client certificate showing is the one that you want to use to connect. If it is not, use the drop-down arrow to select the correct certificate, and then click **OK**.
-   
-    ![VPN client connection](./media/vpn-gateway-howto-point-to-site-rm-ps/clientconnect.png "VPN client connection")
-3. Your connection should now be established.
-   
-    ![Connection established](./media/vpn-gateway-howto-point-to-site-rm-ps/connected.png "Connection established")
+After the VPN gateway finishes creating, you can add the VPN client address pool. The VPN client address pool is the range from which the VPN clients receive an IP address when connecting. Use a private IP address range that does not overlap with the on-premises location that you connect from, or with the VNet that you want to connect to.
 
-## <a name="verify"></a>Part 8 - Verify your connection
+In this example, the VPN client address pool is declared as a [variable](#declare) in an earlier step.
+
+```azurepowershell-interactive
+$Gateway = Get-AzVirtualNetworkGateway -ResourceGroupName $RG -Name $GWName
+Set-AzVirtualNetworkGateway -VirtualNetworkGateway $Gateway -VpnClientAddressPool $VPNClientAddressPool
+```
+
+## <a name="Certificates"></a>Generate certificates
+
+>[!IMPORTANT]
+> You can't generate certificates using Azure Cloud Shell. You must use one of the methods outlined in this section. If you want to use PowerShell, you must install it locally.
+>
+
+Certificates are used by Azure to authenticate VPN clients for point-to-site VPNs. You upload the public key information of the root certificate to Azure. The public key is then considered 'trusted'. Client certificates must be generated from the trusted root certificate, and then installed on each client computer in the Certificates-Current User/Personal certificate store. The certificate is used to authenticate the client when it initiates a connection to the VNet. 
+
+If you use self-signed certificates, they must be created using specific parameters. You can create a self-signed certificate using the instructions for [PowerShell and Windows 10](vpn-gateway-certificates-point-to-site.md), or, if you don't have Windows 10, you can use [MakeCert](vpn-gateway-certificates-point-to-site-makecert.md). It's important that you follow the steps in the instructions when generating self-signed root certificates and client certificates. Otherwise, the certificates you generate will not be compatible with P2S connections and you receive a connection error.
+
+### <a name="cer"></a>Root certificate
+
+1. [!INCLUDE [Root certificate](../../includes/vpn-gateway-p2s-rootcert-include.md)]
+
+1. After you create the root certificate, [export](vpn-gateway-certificates-point-to-site.md#cer) the public certificate data (not the private key) as a Base64 encoded X.509 .cer file.
+
+### <a name="generate"></a>Client certificate
+
+1. [!INCLUDE [Generate a client certificate](../../includes/vpn-gateway-p2s-clientcert-include.md)]
+
+1. After you create client certificate, [export](vpn-gateway-certificates-point-to-site.md#clientexport) it. The client certificate will be distributed to the client computers that will connect.
+
+## <a name="upload"></a>Upload root certificate public key information
+
+Verify that your VPN gateway has finished creating. Once it has completed, you can upload the .cer file (which contains the public key information) for a trusted root certificate to Azure. Once a.cer file is uploaded, Azure can use it to authenticate clients that have installed a client certificate generated from the trusted root certificate. You can upload additional trusted root certificate files - up to a total of 20 - later, if needed.
+
+>[!NOTE]
+> You can't upload the .cer file using Azure Cloud Shell. You can either use PowerShell locally on your computer, or you can use the [Azure portal steps](vpn-gateway-howto-point-to-site-resource-manager-portal.md#uploadfile).
+>
+
+1. Declare the variable for your certificate name, replacing the value with your own.
+
+   ```azurepowershell
+   $P2SRootCertName = "P2SRootCert.cer"
+   ```
+
+1. Replace the file path with your own, and then run the cmdlets.
+
+   ```azurepowershell
+   $filePathForCert = "C:\cert\P2SRootCert.cer"
+   $cert = new-object System.Security.Cryptography.X509Certificates.X509Certificate2($filePathForCert)
+   $CertBase64 = [system.convert]::ToBase64String($cert.RawData)
+   ```
+
+1. Upload the public key information to Azure. Once the certificate information is uploaded, Azure considers it to be a trusted root certificate. When uploading, make sure you are running PowerShell locally on your computer, or instead, you can use the [Azure portal steps](vpn-gateway-howto-point-to-site-resource-manager-portal.md#uploadfile). You can't upload using Azure Cloud Shell.
+
+   ```azurepowershell
+   Add-AzVpnClientRootCertificate -VpnClientRootCertificateName $P2SRootCertName -VirtualNetworkGatewayname "VNet1GW" -ResourceGroupName "TestRG1" -PublicCertData $CertBase64
+   ```
+
+## <a name="clientcertificate"></a>Install an exported client certificate
+
+The following steps help you install on a Windows client. For additional clients and more information, see [Install a client certificate](point-to-site-how-to-vpn-client-install-azure-cert.md).
+
+[!INCLUDE [Install on Windows](../../includes/vpn-gateway-certificates-install-client-cert-include.md)]
+
+Make sure the client certificate was exported as a .pfx along with the entire certificate chain (which is the default). Otherwise, the root certificate information isn't present on the client computer and the client won't be able to authenticate properly.
+
+## <a name="clientconfig"></a>Configure the VPN client
+
+To connect to the virtual network gateway using P2S, each computer uses the VPN client that is natively installed as a part of the operating system. For example, when you go to VPN settings on your Windows computer, you can add VPN connections without installing a separate VPN client. You configure each VPN client by using a client configuration package. The client configuration package contains settings that are specific to the VPN gateway that you created. 
+
+You can use the following quick examples to generate and install the client configuration package. For more information about package contents and additional instructions about to generate and install VPN client configuration files, see [Create and install VPN client configuration files](point-to-site-vpn-client-configuration-azure-cert.md).
+
+If you need to declare your variables again, you can find them [here](#declare).
+
+### To generate configuration files
+
+```azurepowershell-interactive
+$profile=New-AzVpnClientConfiguration -ResourceGroupName $RG -Name $GWName -AuthenticationMethod "EapTls"
+
+$profile.VPNProfileSASUrl
+```
+
+### To install the client configuration package
+
+[!INCLUDE [Windows instructions](../../includes/vpn-gateway-p2s-client-configuration-windows.md)]
+
+## <a name="connect"></a>10. Connect to Azure
+
+### Windows VPN client
+
+[!INCLUDE [Connect from Windows client](../../includes/vpn-gateway-p2s-connect-windows-client.md)]
+
+[!INCLUDE [Client certificates](../../includes/vpn-gateway-certificates-verify-client-cert-include.md)]
+
+### Mac VPN client
+
+From the Network dialog box, locate the client profile that you want to use, then click **Connect**.
+Check [Install - Mac (macOS)](./point-to-site-vpn-client-configuration-azure-cert.md#installmac) for detailed instructions. If you are having trouble connecting, verify that the virtual network gateway is not using a Basic SKU. Basic SKU is not supported for Mac clients.
+
+  ![Mac connection](./media/vpn-gateway-howto-point-to-site-rm-ps/applyconnect.png)
+
+## <a name="verify"></a>To verify a connection
+
+These instructions apply to Windows clients.
+
 1. To verify that your VPN connection is active, open an elevated command prompt, and run *ipconfig/all*.
-2. View the results. Notice that the IP address you received is one of the addresses within the Point-to-Site VPN Client Address Pool that you specified in your configuration. The results should be something similar to this:
-   
-        PPP adapter VNet1:
-            Connection-specific DNS Suffix .:
-            Description.....................: VNet1
-            Physical Address................:
-            DHCP Enabled....................: No
-            Autoconfiguration Enabled.......: Yes
-            IPv4 Address....................: 172.16.201.3(Preferred)
-            Subnet Mask.....................: 255.255.255.255
-            Default Gateway.................:
-            NetBIOS over Tcpip..............: Enabled
+2. View the results. Notice that the IP address you received is one of the addresses within the point-to-site VPN Client Address Pool that you specified in your configuration. The results are similar to this example:
 
-## <a name="addremovecert"></a>To add or remove a trusted root certificate
-Certificates are used to authenticate VPN clients for Point-to-Site VPNs. The following steps walk you through adding and removing root certificates. When you add a Base64-encoded X.509 (.cer) file to Azure, you are telling Azure to trust the root certificate that the file represents. 
+   ```
+   PPP adapter VNet1:
+      Connection-specific DNS Suffix .:
+      Description.....................: VNet1
+      Physical Address................:
+      DHCP Enabled....................: No
+      Autoconfiguration Enabled.......: Yes
+      IPv4 Address....................: 172.16.201.13(Preferred)
+      Subnet Mask.....................: 255.255.255.255
+      Default Gateway.................:
+      NetBIOS over Tcpip..............: Enabled
+   ```
 
-You can add or remove trusted root certificates by using PowerShell, or in the Azure portal. If you want to do this using the Azure portal, go to your **virtual network gateway > settings > Point-to-site configuration > Root certificates**. The following steps walk you through these tasks using PowerShell. 
+## <a name="connectVM"></a>To connect to a virtual machine
 
-### Add a trusted root certificate
-You can add up to 20 trusted root certificate .cer files to Azure. Follow the steps below to add a root certificate.
+These instructions apply to Windows clients.
 
-1. Create and prepare the new root certificate that you will add to Azure. Export the public key as a Base-64 encoded X.509 (.CER) and open it with a text editor. Then copy only the section shown below. 
-   
-    Copy the values, as shown in the following example:
-   
-    ![certificate](./media/vpn-gateway-howto-point-to-site-rm-ps/copycert.png "certificate")
-2. Specify the certificate name and key information as a variable. Replace the information with your own, as shown in the following example:
-   
-        $P2SRootCertName2 = "ARMP2SRootCert2.cer"
-        $MyP2SCertPubKeyBase64_2 = "MIIC/zCCAeugAwIBAgIQKazxzFjMkp9JRiX+tkTfSzAJBgUrDgMCHQUAMBgxFjAUBgNVBAMTDU15UDJTUm9vdENlcnQwHhcNMTUxMjE5MDI1MTIxWhcNMzkxMjMxMjM1OTU5WjAYMRYwFAYDVQQDEw1NeVAyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyjIXoWy8xE/GF1OSIvUaA0bxBjZ1PJfcXkMWsHPzvhWc2esOKrVQtgFgDz4ggAnOUFEkFaszjiHdnXv3mjzE2SpmAVIZPf2/yPWqkoHwkmrp6BpOvNVOpKxaGPOuK8+dql1xcL0eCkt69g4lxy0FGRFkBcSIgVTViS9wjuuS7LPo5+OXgyFkAY3pSDiMzQCkRGNFgw5WGMHRDAiruDQF1ciLNojAQCsDdLnI3pDYsvRW73HZEhmOqRRnJQe6VekvBYKLvnKaxUTKhFIYwuymHBB96nMFdRUKCZIiWRIy8Hc8+sQEsAML2EItAjQv4+fqgYiFdSWqnQCPf/7IZbotgQIDAQABo00wSzBJBgNVHQEEQjBAgBAkuVrWvFsCJAdK5pb/eoCNoRowGDEWMBQGA1UEAxMNTXlQMlNSb290Q2VydIIQKazxzFjMkp9JRiX+tkTfSzAJBgUrDgMCHQUAA4IBAQA223veAZEIar9N12ubNH2+HwZASNzDVNqspkPKD97TXfKHlPlIcS43TaYkTz38eVrwI6E0yDk4jAuPaKnPuPYFRj9w540SvY6PdOUwDoEqpIcAVp+b4VYwxPL6oyEQ8wnOYuoAK1hhh20lCbo8h9mMy9ofU+RP6HJ7lTqupLfXdID/XevI8tW6Dm+C/wCeV3EmIlO9KUoblD/e24zlo3YzOtbyXwTIh34T0fO/zQvUuBqZMcIPfM1cDvqcqiEFLWvWKoAnxbzckye2uk1gHO52d8AVL3mGiX8wBJkjc/pMdxrEvvCzJkltBmqxTM6XjDJALuVh16qFlqgTWCIcb7ju"
-3. Add the new root certificate. You can only add one certificate at a time.
-   
-        Add-AzureRmVpnClientRootCertificate -VpnClientRootCertificateName $P2SRootCertName2 -VirtualNetworkGatewayname "VNet1GW" -ResourceGroupName "TestRG" -PublicCertData $MyP2SCertPubKeyBase64_2
-4. You can verify that the new certificate was added correctly by using the following cmdlet.
-   
-        Get-AzureRmVpnClientRootCertificate -ResourceGroupName "TestRG" `
-        -VirtualNetworkGatewayName "VNet1GW"
+[!INCLUDE [Connect to a VM](../../includes/vpn-gateway-connect-vm.md)]
 
-### To remove a trusted root certificate
-You can remove trusted root certificate from Azure. When you remove a trusted certificate, the client certificates that were generated from the root certificate will no longer be able to connect to Azure via Point-to-Site. If you want clients to connect, they need to install a new client certificate that is generated from a certificate that is trusted in Azure.
+* Verify that the VPN client configuration package was generated after the DNS server IP addresses were specified for the VNet. If you updated the DNS server IP addresses, generate and install a new VPN client configuration package.
 
-1. To remove a trusted root certificate, modify the following sample:
-   
-    Declare the variables.
-   
-        $P2SRootCertName2 = "ARMP2SRootCert2.cer"
-        $MyP2SCertPubKeyBase64_2 = "MIIC/zCCAeugAwIBAgIQKazxzFjMkp9JRiX+tkTfSzAJBgUrDgMCHQUAMBgxFjAUBgNVBAMTDU15UDJTUm9vdENlcnQwHhcNMTUxMjE5MDI1MTIxWhcNMzkxMjMxMjM1OTU5WjAYMRYwFAYDVQQDEw1NeVAyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyjIXoWy8xE/GF1OSIvUaA0bxBjZ1PJfcXkMWsHPzvhWc2esOKrVQtgFgDz4ggAnOUFEkFaszjiHdnXv3mjzE2SpmAVIZPf2/yPWqkoHwkmrp6BpOvNVOpKxaGPOuK8+dql1xcL0eCkt69g4lxy0FGRFkBcSIgVTViS9wjuuS7LPo5+OXgyFkAY3pSDiMzQCkRGNFgw5WGMHRDAiruDQF1ciLNojAQCsDdLnI3pDYsvRW73HZEhmOqRRnJQe6VekvBYKLvnKaxUTKhFIYwuymHBB96nMFdRUKCZIiWRIy8Hc8+sQEsAML2EItAjQv4+fqgYiFdSWqnQCPf/7IZbotgQIDAQABo00wSzBJBgNVHQEEQjBAgBAkuVrWvFsCJAdK5pb/eoCNoRowGDEWMBQGA1UEAxMNTXlQMlNSb290Q2VydIIQKazxzFjMkp9JRiX+tkTfSzAJBgUrDgMCHQUAA4IBAQA223veAZEIar9N12ubNH2+HwZASNzDVNqspkPKD97TXfKHlPlIcS43TaYkTz38eVrwI6E0yDk4jAuPaKnPuPYFRj9w540SvY6PdOUwDoEqpIcAVp+b4VYwxPL6oyEQ8wnOYuoAK1hhh20lCbo8h9mMy9ofU+RP6HJ7lTqupLfXdID/XevI8tW6Dm+C/wCeV3EmIlO9KUoblD/e24zlo3YzOtbyXwTIh34T0fO/zQvUuBqZMcIPfM1cDvqcqiEFLWvWKoAnxbzckye2uk1gHO52d8AVL3mGiX8wBJkjc/pMdxrEvvCzJkltBmqxTM6XjDJALuVh16qFlqgTWCIcb7ju"
-2. Remove the certificate.
-   
-        Remove-AzureRmVpnClientRootCertificate -VpnClientRootCertificateName $P2SRootCertName2 -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG -PublicCertData $MyP2SCertPubKeyBase64_2
-3. Use the following cmdlet to verify that the certificate was removed successfully. 
-   
-        Get-AzureRmVpnClientRootCertificate -ResourceGroupName "TestRG" `
-        -VirtualNetworkGatewayName "VNet1GW"
+* Use 'ipconfig' to check the IPv4 address assigned to the Ethernet adapter on the computer from which you are connecting. If the IP address is within the address range of the VNet that you are connecting to, or within the address range of your VPNClientAddressPool, this is referred to as an overlapping address space. When your address space overlaps in this way, the network traffic doesn't reach Azure, it stays on the local network.
 
-## <a name="revoke"></a>To manage the list of revoked client certificates
-You can revoke client certificates. The certificate revocation list allows you to selectively deny Point-to-Site connectivity based on individual client certificates. If you remove a root certificate .cer from Azure, it revokes the access for all client certificates generated/signed by the revoked root certificate. If you want to revoke a particular client certificate, not the root, you can do so. That way the other certificates that were generated from the root certificate will still be valid.
+## <a name="addremovecert"></a>To add or remove a root certificate
+
+You can add and remove trusted root certificates from Azure. When you remove a root certificate, clients that have a certificate generated from the root certificate can't authenticate and won't be able to connect. If you want a client to authenticate and connect, you need to install a new client certificate generated from a root certificate that is trusted (uploaded) to Azure. These steps require Azure PowerShell cmdlets installed locally on your computer (not Azure Cloud Shell). You can also use the Azure portal to add root certificates.
+
+**To add:**
+
+You can add up to 20 root certificate .cer files to Azure. The following steps help you add a root certificate. 
+
+1. Prepare the .cer file to upload:
+
+   ```azurepowershell
+   $filePathForCert = "C:\cert\P2SRootCert3.cer"
+   $cert = new-object System.Security.Cryptography.X509Certificates.X509Certificate2($filePathForCert)
+   $CertBase64_3 = [system.convert]::ToBase64String($cert.RawData)
+   ```
+
+1. Upload the file. You can only upload one file at a time.
+
+   ```azurepowershell
+   Add-AzVpnClientRootCertificate -VpnClientRootCertificateName $P2SRootCertName -VirtualNetworkGatewayname "VNet1GW" -ResourceGroupName "TestRG1" -PublicCertData $CertBase64_3
+   ```
+
+1. To verify that the certificate file uploaded:
+
+   ```azurepowershell
+   Get-AzVpnClientRootCertificate -ResourceGroupName "TestRG1" `
+   -VirtualNetworkGatewayName "VNet1GW"
+   ```
+
+**To remove:**
+
+1. Declare the variables. Modify the variables in the example to match the certificate that you want to remove.
+
+   ```azurepowershell-interactive
+   $GWName = "Name_of_virtual_network_gateway"
+   $RG = "Name_of_resource_group"
+   $P2SRootCertName2 = "ARMP2SRootCert2.cer"
+   $MyP2SCertPubKeyBase64_2 = "MIIC/zCCAeugAwIBAgIQKazxzFjMkp9JRiX+tkTfSzAJBgUrDgMCHQUAMBgxFjAUBgNVBAMTDU15UDJTUm9vdENlcnQwHhcNMTUxMjE5MDI1MTIxWhcNMzkxMjMxMjM1OTU5WjAYMRYwFAYDVQQDEw1NeVAyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyjIXoWy8xE/GF1OSIvUaA0bxBjZ1PJfcXkMWsHPzvhWc2esOKrVQtgFgDz4ggAnOUFEkFaszjiHdnXv3mjzE2SpmAVIZPf2/yPWqkoHwkmrp6BpOvNVOpKxaGPOuK8+dql1xcL0eCkt69g4lxy0FGRFkBcSIgVTViS9wjuuS7LPo5+OXgyFkAY3pSDiMzQCkRGNFgw5WGMHRDAiruDQF1ciLNojAQCsDdLnI3pDYsvRW73HZEhmOqRRnJQe6VekvBYKLvnKaxUTKhFIYwuymHBB96nMFdRUKCZIiWRIy8Hc8+sQEsAML2EItAjQv4+fqgYiFdSWqnQCPf/7IZbotgQIDAQABo00wSzBJBgNVHQEEQjBAgBAkuVrWvFsCJAdK5pb/eoCNoRowGDEWMBQGA1UEAxMNTXlQMlNSb290Q2VydIIQKazxzFjMkp9JRiX+tkTfSzAJBgUrDgMCHQUAA4IBAQA223veAZEIar9N12ubNH2+HwZASNzDVNqspkPKD97TXfKHlPlIcS43TaYkTz38eVrwI6E0yDk4jAuPaKnPuPYFRj9w540SvY6PdOUwDoEqpIcAVp+b4VYwxPL6oyEQ8wnOYuoAK1hhh20lCbo8h9mMy9ofU+RP6HJ7lTqupLfXdID/XevI8tW6Dm+C/wCeV3EmIlO9KUoblD/e24zlo3YzOtbyXwTIh34T0fO/zQvUuBqZMcIPfM1cDvqcqiEFLWvWKoAnxbzckye2uk1gHO52d8AVL3mGiX8wBJkjc/pMdxrEvvCzJkltBmqxTM6XjDJALuVh16qFlqgTWCIcb7ju"
+   ```
+
+1. Remove the certificate.
+
+   ```azurepowershell-interactive
+   Remove-AzVpnClientRootCertificate -VpnClientRootCertificateName $P2SRootCertName2 -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG -PublicCertData $MyP2SCertPubKeyBase64_2
+   ```
+
+1. Use the following example to verify that the certificate was removed successfully.
+
+   ```azurepowershell-interactive
+   Get-AzVpnClientRootCertificate -ResourceGroupName "TestRG1" `
+   -VirtualNetworkGatewayName "VNet1GW"
+   ```
+
+## <a name="revoke"></a>To revoke or reinstate a client certificate
+
+You can revoke client certificates. The certificate revocation list allows you to selectively deny point-to-site connectivity based on individual client certificates. This is different than removing a trusted root certificate. If you remove a trusted root certificate .cer from Azure, it revokes the access for all client certificates generated/signed by the revoked root certificate. Revoking a client certificate, rather than the root certificate, allows the other certificates that were generated from the root certificate to continue to be used for authentication.
 
 The common practice is to use the root certificate to manage access at team or organization levels, while using revoked client certificates for fine-grained access control on individual users.
 
-### Revoke a client certificate
-1. Get the thumbprint of the client certificate to revoke.
-   
-        $RevokedClientCert1 = "ClientCert1"
-        $RevokedThumbprint1 = "‎ef2af033d0686820f5a3c74804d167b88b69982f"
-2. Add the thumbprint to the list of revoked thumbprint.
-   
-        Add-AzureRmVpnClientRevokedCertificate -VpnClientRevokedCertificateName $RevokedClientCert1 `
-        -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG -Thumbprint $RevokedThumbprint1
-3. Verify that the thumbprint was added to the certificate revocation list. You must add one thumbprint at a time.
-   
-        Get-AzureRmVpnClientRevokedCertificate -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG
+**To revoke:**
 
-### Reinstate a client certificate
+1. Retrieve the client certificate thumbprint. For more information, see [How to retrieve the Thumbprint of a Certificate](/dotnet/framework/wcf/feature-details/how-to-retrieve-the-thumbprint-of-a-certificate).
+
+1. Copy the information to a text editor and remove all spaces so that it is a continuous string. This string is declared as a variable in the next step.
+
+1. Declare the variables. Make sure to declare the thumbprint you retrieved in the previous step.
+
+   ```azurepowershell-interactive
+   $RevokedClientCert1 = "NameofCertificate"
+   $RevokedThumbprint1 = "‎51ab1edd8da4cfed77e20061c5eb6d2ef2f778c7"
+   $GWName = "Name_of_virtual_network_gateway"
+   $RG = "Name_of_resource_group"
+   ```
+
+1. Add the thumbprint to the list of revoked certificates. You see "Succeeded" when the thumbprint has been added.
+
+   ```azurepowershell-interactive
+   Add-AzVpnClientRevokedCertificate -VpnClientRevokedCertificateName $RevokedClientCert1 `
+   -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG `
+   -Thumbprint $RevokedThumbprint1
+   ```
+
+1. Verify that the thumbprint was added to the certificate revocation list.
+
+   ```azurepowershell-interactive
+   Get-AzVpnClientRevokedCertificate -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG
+   ```
+
+1. After the thumbprint has been added, the certificate can no longer be used to connect. Clients that try to connect using this certificate receive a message saying that the certificate is no longer valid.
+
+**To reinstate:**
+
 You can reinstate a client certificate by removing the thumbprint from the list of revoked client certificates.
 
-1. Remove the thumbprint from the list of revoked client certificate thumbprint.
-   
-       Remove-AzureRmVpnClientRevokedCertificate -VpnClientRevokedCertificateName $RevokedClientCert1 `
-       -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG -Thumbprint $RevokedThumbprint1
-2. Check if the thumbprint is removed from the revoked list.
-   
-        Get-AzureRmVpnClientRevokedCertificate -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG
+1. Declare the variables. Make sure you declare the correct thumbprint for the certificate that you want to reinstate.
+
+   ```azurepowershell-interactive
+   $RevokedClientCert1 = "NameofCertificate"
+   $RevokedThumbprint1 = "‎51ab1edd8da4cfed77e20061c5eb6d2ef2f778c7"
+   $GWName = "Name_of_virtual_network_gateway"
+   $RG = "Name_of_resource_group"
+   ```
+
+1. Remove the certificate thumbprint from the certificate revocation list.
+
+   ```azurepowershell-interactive
+   Remove-AzVpnClientRevokedCertificate -VpnClientRevokedCertificateName $RevokedClientCert1 `
+   -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG -Thumbprint $RevokedThumbprint1
+   ```
+
+1. Check if the thumbprint is removed from the revoked list.
+
+   ```azurepowershell-interactive
+   Get-AzVpnClientRevokedCertificate -VirtualNetworkGatewayName $GWName -ResourceGroupName $RG
+   ```
+
+## <a name="faq"></a>Point-to-Site FAQ
+
+For additional point-to-site information, see the [VPN Gateway point-to-site FAQ](vpn-gateway-vpn-faq.md#P2S)
 
 ## Next steps
-Once your connection is complete, you can add virtual machines to your virtual networks. For more information, see [Virtual Machines](https://docs.microsoft.com/azure/#pivot=services&panel=Compute).
 
+Once your connection is complete, you can add virtual machines to your virtual networks. For more information, see [Virtual Machines](../index.yml). To understand more about networking and virtual machines, see [Azure and Linux VM network overview](../virtual-machines/network-overview.md).
+
+For P2S troubleshooting information, [Troubleshooting: Azure point-to-site connection problems](vpn-gateway-troubleshoot-vpn-point-to-site-connection-problems.md).

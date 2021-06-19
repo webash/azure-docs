@@ -1,236 +1,184 @@
 ---
-title: List of Microsoft-managed connectors for use in Microsoft Azure Logic apps | Microsoft Docs
-description: Get a complete list of the Microsoft-Managed connectors you can use to build Logic apps in Azure App Service
+title: Connectors for Azure Logic Apps
+description: Overview about using connectors to build automated workflows with Azure Logic Apps. Learn how different triggers, actions, and connectors work.
 services: logic-apps
-documentationcenter: ''
-author: MSFTMAN
-manager: erikre
-editor: ''
-tags: connectors
-
-ms.assetid: f1f1fd50-b7f9-4d13-824a-39678619aa7a
-ms.service: logic-apps
-ms.workload: integration
-ms.tgt_pltfrm: na
-ms.devlang: na
-ms.topic: get-started-article
-ms.date: 09/20/2016
-ms.author: deonhe
-
+ms.suite: integration
+ms.reviewer: estfan, logicappspm, azla
+ms.topic: conceptual
+ms.date: 04/20/2021
+ms.custom: contperf-fy21q4
 ---
-# List of connectors
-Select a connector to learn how to build workflows quickly.
 
-## Standard connectors
-| Connectors |  |  |  |
-| --- | --- | --- | --- |
-|[![API Icon][API/Web-Appicon]<br/>**API/Web App**][API/Web-Appdoc]|![API Icon][appFiguresicon]<br/>**appFigures**|![API Icon][Asanaicon]<br/>**Asana**|![API Icon][Azure-DocumentDBicon]<br/>**Azure DocumentDB**|
-|![API Icon][Azure-MLicon]<br/>**Azure ML**|[![API Icon][Azure~Functionsicon]<br/>**Azure<br/>Functions**][Azure~Functionsdoc]|[![API Icon][AzureBlobStorageicon]<br/>**Azure Blob<br/>Storage**][AzureBlobStoragedoc]|![API Icon][Basecamp-3icon]<br/>**Basecamp 3**|
-|![API Icon][Bitlyicon]<br/>**Bitly**|![API Icon][BizTalk-Servericon]<br/>**BizTalk Server**|![API Icon][Bloggericon]<br/>**Blogger**|[![API Icon][Boxicon]<br/>**Box**][boxDoc]|
-|![API Icon][Campfireicon]<br/>**Campfire**|![API Icon][Cognitive-Services~Text-Analyticsicon]<br/>**Cognitive Services<br/>Text Analytics**|![API Icon][Common-Data~Serviceicon]<br/>**Common Data<br/>Service**|[![API Icon][DB2icon]<br/>**DB2**][db2doc]|
-|[![API Icon][Delayicon]<br/>**Delay**][Delaydoc]|[![API Icon][Dropboxicon]<br/>**Dropbox**][dropboxdoc]|[![API Icon][Dynamics-365icon]<br/>**Dynamics 365**][Dynamics-365doc]|![API Icon][Dynamics-365~for-Financialsicon]<br/>**Dynamics 365<br/>for Financials**|
-|![API Icon][Dynamics-365~for-Operationsicon]<br/>**Dynamics 365<br/>for Operations**|![API Icon][Easy-Redmineicon]<br/>**Easy Redmine**|[![API Icon][Facebookicon]<br/>**Facebook**][Facebookdoc]|[![API Icon][FTPicon]<br/>**FTP**][FTPdoc]|
-|![API Icon][GitHubicon]<br/>**GitHub**|![API Icon][Google-Calendaricon]<br/>**Google Calendar**|[![API Icon][Google-Driveicon]<br/>**Google Drive**][Google-Drivedoc]|![API Icon][Google-Sheetsicon]<br/>**Google Sheets**|
-|![API Icon][Google-Tasksicon]<br/>**Google Tasks**|![API Icon][HideKeyicon]<br/>**HideKey**|![API Icon][HipChaticon]<br/>**HipChat**|[![API Icon][HTTPicon]<br/>**HTTP**][HTTPdoc]|
-|[![API Icon][HTTP-Swaggericon]<br/>**HTTP Swagger**][http-swaggerdoc]|[![API Icon][HTTP~Requesticon]<br/>**HTTP<br/>Request**][HTTP~Requestdoc]|[![API Icon][HTTP~Responseicon]<br/>**HTTP<br/>Response**][HTTP~Responsedoc]|[![API Icon][Informixicon]<br/>**Informix**][Informixdoc]|
-|![API Icon][Insightlyicon]<br/>**Insightly**|![API Icon][Instagramicon]<br/>**Instagram**|![API Icon][Instapapericon]<br/>**Instapaper**|![API Icon][JIRAicon]<br/>**JIRA**|
-|[![API Icon][MailChimpicon]<br/>**MailChimp**][MailChimpdoc]|![API Icon][Mandrillicon]<br/>**Mandrill**|[![API Icon][Microsoft-Translatoricon]<br/>**Microsoft<br/>Translator**][Microsoft-Translatordoc]|![API Icon][MQicon]<br/>**MQ**|
-|[![API Icon][Nested~Logic-Appicon]<br/>**Nested<br/>Logic App**][Nested~Logic-Appdoc]|[![API Icon][Office-365~Outlookicon]<br/>**Office 365<br/>Outlook**][office365-outlookdoc]|[![API Icon][Office-365~Usersicon]][office365-usersdoc]<br/>**Office 365<br/>Users**|[![API Icon][Office-365~Videoicon]<br/>**Office 365<br/>Video**][office365-videodoc]|
-|[![API Icon][OneDriveicon]<br/>**OneDrive**][OneDrivedoc]|[![API Icon][OneDrive-for~Businessicon]<br/>**OneDrive for<br/>Business**][OneDrive-for~Businessdoc]|[![API Icon][Outlook.comicon]<br/>**Outlook.com**][Outlook.comdoc]|![API Icon][PagerDutyicon]<br/>**PagerDuty**|
-|![API Icon][Pinteresticon]<br/>**Pinterest**|[![API Icon][Project-Onlineicon]<br/>**Project Online**][Project-Onlinedoc]|[![API Icon][Queryicon]<br/>**Query**][Querydoc]|[![API Icon][Recurrenceicon]<br/>**Recurrence**][Recurrencedoc]|
-|![API Icon][Redmineicon]<br/>**Redmine**|[![API Icon][RSSicon]<br/>**RSS**][RSSdoc]|[![API Icon][Salesforceicon]<br/>**Salesforce**][Salesforcedoc]|[![API Icon][SendGridicon]<br/>**SendGrid**][SendGriddoc]|
-|[![API Icon][Service-Busicon]<br/>**Service Bus**][Service-Busdoc]|[![API Icon][SFTPicon]<br/>**SFTP**][SFTPdoc]|[![API Icon][SharePointicon]<br/>**SharePoint**][SharePointdoc]|[![API Icon][Slackicon]<br/>**Slack**][Slackdoc]|
-|![API Icon][Smartsheeticon]<br/>**Smartsheet**|[![API Icon][SMTPicon]<br/>**SMTP**][SMTPdoc]|![API Icon][SparkPosticon]<br/>**SparkPost**|[![API Icon][SQL-Servericon]<br/>**SQL Server**][SQL-Serverdoc]|
-|![API Icon][Todoisticon]<br/>**Todoist**|[![API Icon][Trelloicon]<br/>**Trello**][Trellodoc]|[![API Icon][Twilioicon]<br/>**Twilio**][Twiliodoc]|[![API Icon][Twittericon]<br/>**Twitter**][Twitterdoc]|
-|![API Icon][Vimeoicon]<br/>**Vimeo**|![API Icon][Visual-Studio~Team-Servicesicon]<br/>**Visual Studio<br/>Team Services**|[![API Icon][Webhookicon]<br/>**Webhook**][Webhookdoc]|![API Icon][WordPressicon]<br/>**WordPress**|
-|[![API Icon][Wunderlisticon]<br/>**Wunderlist**][Wunderlistdoc]|[![API Icon][Yammericon]<br/>**Yammer**][Yammerdoc]|![API Icon][YouTubeicon]<br/>**YouTube**|[![API Icon][FileSystemIcon]<br/>**File System**][FileSystemdoc]
+# Connectors for Azure Logic Apps
+
+In Azure Logic Apps, *connectors* help you quickly access data, events, and other resources from other apps, services, systems, protocols, and platforms. When you use connectors, you can build logic app workflows that use, process, and integrate information across cloud-based, on-premises, and hybrid environments - often without having to write any code.
+
+You can choose from hundreds of connectors to use in your workflows. As a result, this documentation focuses on some popular and commonly used connectors for Logic Apps. For complete information about connectors across Logic Apps, Microsoft Power Automate, and Microsoft Power Apps, review the [Connectors documentation](/connectors). For information on pricing, review the [Logic Apps pricing model](../logic-apps/logic-apps-pricing.md), and [Logic Apps pricing details](https://azure.microsoft.com/pricing/details/logic-apps/).
 
 > [!NOTE]
-> If you want to get started with Azure Logic Apps before signing up for an Azure account, go to [Try Logic App](https://tryappservice.azure.com/?appservice=logic). You can immediately create a short-lived starter Logic app in App Service. No credit cards required; no commitments.
-> 
-> 
+> To integrate your workflow with a service or API that doesn't have a connector, you can either call 
+> the service over a protocol, such as HTTP, or [create a custom connector](#custom-apis-and-connectors).
 
-## Enterprise Integration Pack (EIP) connectors
-Use the EIP connectors to create Logic apps for B2B scenarios that include EAI and EDI.  
+## What are connectors?
 
-| EIP connectors |  |  |  |
-| --- | --- | --- | --- |
-| [![API Icon][xmlvalidateicon]<br/>**XML <br/>validation**][xmlvalidatedoc] |[![API Icon][xmltransformicon]<br/>**XML<br/> transform**][xmltransformdoc] |[![API Icon][flatfileicon]<br/>**Flat file</br>encode**][flatfiledoc] |[![API Icon][flatfiledecodeicon]<br/>**Flat file</br>decode**][flatfiledecodedoc] |
-| [![API Icon][as2icon]<br/>**AS2</br>decode**][as2decode] |[![API Icon][as2icon]<br/>**AS2</br>encode**][as2encode] |[![API Icon][x12icon]<br/>**X12</br>decode**][x12decode] |[![API Icon][x12icon]<br/>**X12</br>encode**][x12encode] |
-| [![API Icon][x12icon]<br/>**EDIFACT</br>decode**][EDIFACTdecode] |[![API Icon][x12icon]<br/>**EDIFACT</br>encode**][EDIFACTencode] | | |
+Connectors provide *triggers* and *actions* that you use to perform tasks in your logic app's workflow. Each trigger and action has properties that you can configure. Some triggers and actions require that you [create and configure connections](#connection-configuration) so that your workflow can access a specific service or system.
 
-<!-- TODO: Add Functions, App Service, and Nested Workflow Icons -->
-### Connectors can be triggers
-Several connectors provide triggers that can notify your app when specific events occur. For example, the FTP connector has the OnUpdatedFile trigger. You can build either a Logic app, PowerApp or Flow that listens to this trigger and takes an action whenever the trigger is fired.
+### Triggers
 
-There are two types of triggers:  
+A *trigger* specifies the event that starts the workflow and is always the first step in any workflow. Each trigger also follows a specific firing pattern that controls how the trigger monitors and responds to events. Usually, a trigger follows the *polling* pattern or *push* pattern, but sometimes, a trigger is available in both versions.
 
-* Poll Triggers: These triggers poll your service at a specified frequency to check for new data. When new data is available, a new instance of your app runs with the data as input. To prevent the same data from being consumed multiple times, the trigger may clean up data that has been read and passed to your app.
-* Push Triggers: These triggers listen for data on an endpoint or for an event to occur, then, triggers a new instance of your app. The Twitter connector is one such example.
+- *Polling triggers* regularly check a specific service or system on a specified schedule to check for new data or a specific event. If new data is available, or the specific event happens, these triggers create and run a new instance of your workflow. This new instance can then use the data that's passed as input.
+- *Push triggers* listen for new data or for an event to happen, without polling. When new data is available, or when the event happens, these triggers create and run a new instance of your workflow. This new instance can then use the data that's passed as input.
 
-### Connectors can be actions
-Connectors can also be used as actions within your apps. Actions are useful for looking up data which can then be used in the execution of your app. For example, you may need to look up customer data from a SQL database when processing an order. Or, you may need to write, update or delete data in a destination table. You can do this using the actions provided by the connectors. Actions map to operations that are defined in the Swagger metadata.
+For example, you might want to build a workflow that does something when a file is uploaded to your FTP server. As the first step in your workflow, you can use the FTP trigger named **When a file is added or modified**, which follows the polling pattern. You can then specify a schedule to regularly check for upload events.
 
-## Next Steps
-* [Build a logic app now](../app-service-logic/app-service-logic-create-a-logic-app.md)  
-* [Create a custom connector](../app-service-logic/app-service-logic-create-api-app.md)
-* [Monitor your logic apps](../app-service-logic/app-service-logic-monitor-your-logic-apps.md)
+A trigger also passes along any inputs and other required data into your workflow where later actions can reference and use that data throughout the workflow. For example, suppose you want to use Office 365 Outlook trigger named **When a new email arrives** to start a workflow when you get a new email. You can configure this trigger to pass along the content from each new email, such as the sender, subject line, body, attachments, and so on. Your workflow can then process that information by using other actions.
 
-<!--Connectors Documentation-->
-[azureblobstoragedoc]: ./connectors-create-api-azureblobstorage.md "Connect to Azure blob to manage files in your blob container."
-[boxDoc]: ./connectors-create-api-box.md "Connects to Box and can upload, get, delete, list, and more file tasks."
-[Dynamics-365doc]: ./connectors-create-api-crmonline.md "Connect to Dynamics CRM Online and do more with your CRM Online data."
-[db2doc]: ./connectors-create-api-db2.md "Connect to IBM DB2 in the cloud or on-premises to update a row, get a table, and more."
-[dropboxdoc]: ./connectors-create-api-dropbox.md "Connect to Dropbox and can get, delete, list, and more file tasks."
-[facebookdoc]: ./connectors-create-api-facebook.md "Connect to Facebook to post to a timeline, get a page feed, and more."
-[ftpdoc]: ./connectors-create-api-ftp.md "Connects to an FTP / FTPS server and do different FTP tasks, including uploading, getting, deleting files, and more."
-[google-drivedoc]: ./connectors-create-api-googledrive.md "Connect to GoogleDrive and interact with your data."
-[informixdoc]: ./connectors-create-api-informix.md "Connect to Informix in the cloud or on-premises to read a row, lists the tables, and more."
-[microsoft-translatordoc]: ./connectors-create-api-microsofttranslator.md
-[office365-outlookdoc]: ./connectors-create-api-office365-outlook.md "The Office 365 Connector can send and receive emails, manage your calendar, and manage your contacts using your Office 365 account."
-[office365-usersdoc]: ./connectors-create-api-office365-users.md
-[office365-videodoc]: ./connectors-create-api-office365-video.md
-[onedrivedoc]: ./connectors-create-api-onedrive.md "Connects to your personal Microsoft OneDrive and upload, delete, list files, and more."
-[onedrive-for~businessdoc]: ./connectors-create-api-onedriveforbusiness.md "Connects to your business Microsoft OneDrive and uploads, deletes, lists your files, and more."
-[outlook.comdoc]: ./connectors-create-api-outlook.md "Connect to your Outlook mailbox and access your email and more."
-[project-onlinedoc]: ./connectors-create-api-projectonline.md "Connects to Microsoft Project Online."
-[rssdoc]: ./connectors-create-api-rss.md "RSS connector allows the users to publish and retrieve feed items. It also allows the users to trigger operations when a new item is published to the feed."
-[salesforcedoc]: ./connectors-create-api-salesforce.md "Connect to your Salesforce account and manage  accounts, leads, opportunities, and more."
-[sendgriddoc]: ./connectors-create-api-sendgrid.md "Connects to Microsoft Project Online."
-[service-busdoc]: ./connectors-create-api-servicebus.md "Can send messages from Service Bus Queues and Topics and receive messages from Service Bus Queues and Subscriptions."
-[sharepointdoc]: ./connectors-create-api-sharepointonline.md "Connects to SharePoint Online to manage documents and list items."
-[slackdoc]: ./connectors-create-api-slack.md "Connect to Slack and post messages to Slack channels."
-[sftpdoc]: ./connectors-create-api-sftp.md "Connects to SFTP and can upload, get, delete files, and more."
-[githubdoc]: ./connectors-create-api-github.md "Connects to GitHub and can track issues."
-[mailchimpdoc]: ./connectors-create-api-mailchimp.md "Send Better Email."
-[smtpdoc]: ./connectors-create-api-smtp.md "Connects to a SMTP server and can send email with attachments."
-[sql-serverdoc]: ./connectors-create-api-sqlazure.md "Connects to SQL Azure Database. You can create, update, get, and delete entries on a SQL database table."
-[trellodoc]: ./connectors-create-api-trello.md "Trello is the free,  flexible, and visual way to organize anything with anyone."
-[twiliodoc]: ./connectors-create-api-twilio.md "Connects to Twilio and can send and get messages, get available numbers, managing incoming phone numbers, and more."
-[twitterdoc]: ./connectors-create-api-twitter.md "Connects to Twitter and get timelines, post tweets, and more."
-[wunderlistdoc]: ./connectors-create-api-wunderlist.md "Keep your life in sync."
-[yammerdoc]: ./connectors-create-api-yammer.md "Connects to Yammer to post messages and get new messages."
-[as2doc]: ../app-service-logic/app-service-logic-enterprise-integration-as2.md "Learn about enterprise integration AS2."
-[x12doc]: ../app-service-logic/app-service-logic-enterprise-integration-x12.md "Learn about enterprise integration X12"
-[flatfiledoc]: ../app-service-logic/app-service-logic-enterprise-integration-flatfile.md "Learn about enterprise integration flat file."
-[flatfiledecodedoc]: ../app-service-logic/app-service-logic-enterprise-integration-flatfile.md "Learn about enterprise integration flat file."
-[xmlvalidatedoc]: ../app-service-logic/app-service-logic-enterprise-integration-xml-validation.md "Learn about enterprise integration XML validation."
-[xmltransformdoc]: ../app-service-logic/app-service-logic-enterprise-integration-transform.md "Learn about enterprise integration transforms."
-[as2decode]: ..//app-service-logic/app-service-logic-enterprise-integration-as2-decode.md "Learn about enterprise integration AS2 decode"
-[as2encode]: ..//app-service-logic/app-service-logic-enterprise-integration-as2-encode.md "Learn about enterprise integration AS2 encode"
-[X12decode]: ..//app-service-logic/app-service-logic-enterprise-integration-X12-decode.md "Learn about enterprise integration X12 decode"
-[X12encode]: ..//app-service-logic/app-service-logic-enterprise-integration-X12-encode.md "Learn about enterprise integration X12 encode"
-[EDIFACTdecode]: ..//app-service-logic/app-service-logic-enterprise-integration-EDIFACT-decode.md "Learn about enterprise integration EDIFACT decode"
-[EDIFACTencode]: ..//app-service-logic/app-service-logic-enterprise-integration-EDIFACT-encode.md "Learn about enterprise integration EDIFACT encode"
-[httpdoc]: ./connectors-native-http.md "HTTP connector to make HTTP calls."
-[http~requestdoc]: ./connectors-native-reqres.md "Request and Response actions."
-[http~responsedoc]: ./connectors-native-reqres.md "Request and Response actions."
-[delaydoc]: ./connectors-native-delay.md "Learn about the delay action."
-[http-swaggerdoc]: ./connectors-native-http-swagger.md "HTTP + Swagger connector to make HTTP calls."
-[querydoc]: ./connectors-native-query.md "Query action to select and filter arrays."
-[webhookdoc]: ./connectors-native-webhook.md "Webhook action and trigger for logic apps."
-[azure~functionsdoc]: ../app-service-logic/app-service-logic-azure-functions.md "Integrate logic apps with Azure Functions."
-[api/web-appdoc]: ../app-service-logic/app-service-logic-custom-hosted-api.md "Integrate logic apps with App Service API Apps."
-[nested~logic-appdoc]: ../app-service-logic/app-service-logic-http-endpoint.md "Integrate logic apps with a nested workflow."
-[recurrencedoc]:  ./connectors-native-recurrence.md "Recurrence trigger for logic apps."
-[google-sheetsdoc]: ./connectors-create-api-googlesheet.md "Connects to Google Sheets and can modify sheets."
-[google-tasksdoc]: ./connectors-create-api-googletasks.md "Connects to Google Tasks and can manage tasks."
-[google~calendardoc]: ./connectors-create-api-googlecalendar.md "Connects to Google Calendar and can manage calendar."
-[instagramdoc]: ./connectors-create-api-instagram.md "Connects to Instagram and can trigger or act on events."
-[mandrilldoc]: ./connectors-create-api-mandrill.md "Connects to Mandrill and can be used for communication."
-[youtubedoc]: ./connectors-create-api-youtube.md "Connects to YouTube and can interact with videos and channels."
-[sparkpostdoc]: ./connectors-create-api-sparkpost.md "Connects to SparkPost and can be used for communication."
-[filesystemdoc]: ..//app-service-logic/app-service-logic-use-file-connector.md "Use file system connector to communicate with on-premises file system."
+### Actions
 
-<!--Icon references-->
-[appFiguresicon]: ./media/apis-list/appfigures.png
-[Asanaicon]: ./media/apis-list/asana.png
-[AzureBlobStorageicon]: ./media/apis-list/azureblob.png
-[Azure-MLicon]: ./media/apis-list/azureml.png
-[Basecamp-3icon]: ./media/apis-list/basecamp.png
-[Bitlyicon]: ./media/apis-list/bitly.png
-[BizTalk-Servericon]: ./media/apis-list/biztalk.png
-[Bloggericon]: ./media/apis-list/blogger.png
-[Boxicon]: ./media/apis-list/box.png
-[Campfireicon]: ./media/apis-list/campfire.png
-[Cognitive-Services~Text-Analyticsicon]: ./media/apis-list/cognitiveservicestextanalytics.png
-[DB2icon]: ./media/apis-list/db2.png
-[Azure-DocumentDBicon]: ./media/apis-list/documentdb.png
-[Dropboxicon]: ./media/apis-list/dropbox.png
-[Dynamics-365~for-Operationsicon]: ./media/apis-list/dynamicsax.png
-[Dynamics-365icon]: ./media/apis-list/dynamicscrmonline.png
-[Easy-Redmineicon]: ./media/apis-list/easyredmine.png
-[Facebookicon]: ./media/apis-list/facebook.png
-[FTPicon]: ./media/apis-list/ftp.png
-[GitHubicon]: ./media/apis-list/github.png
-[Google-Calendaricon]: ./media/apis-list/googlecalendar.png
-[Google-Driveicon]: ./media/apis-list/googledrive.png
-[Google-Sheetsicon]: ./media/apis-list/googlesheet.png
-[Google-Tasksicon]: ./media/apis-list/googletasks.png
-[HideKeyicon]: ./media/apis-list/hidekey.png
-[HipChaticon]: ./media/apis-list/hipchat.png
-[Informixicon]: ./media/apis-list/informix.png
-[Insightlyicon]: ./media/apis-list/insightly.png
-[Instagramicon]: ./media/apis-list/instagram.png
-[Instapapericon]: ./media/apis-list/instapaper.png
-[JIRAicon]: ./media/apis-list/jira.png
-[Dynamics-365~for-Financialsicon]: ./media/apis-list/madeira.png
-[MailChimpicon]: ./media/apis-list/mailchimp.png
-[Mandrillicon]: ./media/apis-list/mandrill.png
-[Microsoft-Translatoricon]: ./media/apis-list/microsofttranslator.png
-[MQicon]: ./media/apis-list/mq.png
-[Office-365~Outlookicon]: ./media/apis-list/office365.png
-[Office-365~Usersicon]: ./media/apis-list/office365users.png
-[Office-365~Videoicon]: ./media/apis-list/office365video.png
-[OneDriveicon]: ./media/apis-list/onedrive.png
-[OneDrive-for~Businessicon]: ./media/apis-list/onedriveforbusiness.png
-[Outlook.comicon]: ./media/apis-list/outlook.png
-[PagerDutyicon]: ./media/apis-list/pagerduty.png
-[Pinteresticon]: ./media/apis-list/pinterest.png
-[Project-Onlineicon]: ./media/apis-list/projectonline.png
-[Redmineicon]: ./media/apis-list/redmine.png
-[RSSicon]: ./media/apis-list/rss.png
-[Common-Data~Serviceicon]: ./media/apis-list/runtimeservice.png
-[Salesforceicon]: ./media/apis-list/salesforce.png
-[SendGridicon]: ./media/apis-list/sendgrid.png
-[Service-Busicon]: ./media/apis-list/servicebus.png
-[SFTPicon]: ./media/apis-list/sftp.png
-[SharePointicon]: ./media/apis-list/sharepointonline.png
-[Slackicon]: ./media/apis-list/slack.png
-[Smartsheeticon]: ./media/apis-list/smartsheet.png
-[SMTPicon]: ./media/apis-list/smtp.png
-[SparkPosticon]: ./media/apis-list/sparkpost.png
-[SQL-Servericon]: ./media/apis-list/sql.png
-[Todoisticon]: ./media/apis-list/todoist.png
-[Trelloicon]: ./media/apis-list/trello.png
-[Twilioicon]: ./media/apis-list/twilio.png
-[Twittericon]: ./media/apis-list/twitter.png
-[Vimeoicon]: ./media/apis-list/vimeo.png
-[Visual-Studio~Team-Servicesicon]: ./media/apis-list/visualstudioteamservices.png
-[WordPressicon]: ./media/apis-list/wordpress.png
-[Wunderlisticon]: ./media/apis-list/wunderlist.png
-[Yammericon]: ./media/apis-list/yammer.png
-[YouTubeicon]: ./media/apis-list/youtube.png
+An *action* is an operation that follows the trigger and performs some kind of task in your workflow. You can use multiple actions in your workflow. For example, you might start the workflow with a SQL trigger that detects new customer data in a SQL database. Following the trigger, your workflow can have a SQL action that gets the customer data. Following the SQL action, your workflow can have another action, not necessarily SQL, that processes the data.
 
+## Connector categories
 
-<!-- Primitive Icons -->
-[HTTPicon]: ./media/apis-list/http.png
-[HTTP~Requesticon]: ./media/apis-list/request.png
-[HTTP~Responseicon]: ./media/apis-list/response.png
-[Delayicon]: ./media/apis-list/delay.png
-[HTTP-Swaggericon]: ./media/apis-list/http_swagger.png
-[Queryicon]: ./media/apis-list/query.png
-[Webhookicon]: ./media/apis-list/webhook.png
-[Azure~Functionsicon]: ./media/apis-list/function.png
-[API/Web-Appicon]: ./media/apis-list/api.png
-[Nested~Logic-Appicon]: ./media/apis-list/workflow.png
-[Recurrenceicon]: ./media/apis-list/recurrence.png
-[FileSystemIcon]: ./media/apis-list/filesystem.png
+In Logic Apps, most triggers and actions are available in either a *built-in* version or *managed connector* version. A small number of triggers and actions are available in both versions. The versions available depend on whether you create a multi-tenant logic app or a single-tenant logic app, which is currently available only in [single-tenant Azure Logic Apps](../logic-apps/single-tenant-overview-compare.md).
 
-<!-- EIP Icons -->
-[as2icon]: ./media/apis-list/as2new.png
-[x12icon]: ./media/apis-list/x12new.png
-[flatfileicon]: ./media/apis-list/flatfileencoding.png
-[flatfiledecodeicon]: ./media/apis-list/flatfiledecoding.png
-[xmlvalidateicon]: ./media/apis-list/xmlvalidation.png
-[xmltransformicon]: ./media/apis-list/xsltransform.png
+[Built-in triggers and actions](built-in.md) run natively on the Logic Apps runtime, don't require creating connections, and perform these kinds of tasks:
+
+- [Run code in your workflows](built-in.md#run-code-from-workflows).
+- [Organize and control your data](built-in.md#control-workflow).
+- [Manage or manipulate data](built-in.md#manage-or-manipulate-data).
+
+[Managed connectors](managed.md) are deployed, hosted, and managed by Microsoft. These connectors provide triggers and actions for cloud services, on-premises systems, or both. Managed connectors are available in these categories:
+
+- [On-premises connectors](managed.md#on-premises-connectors) that help you access data and resources in on-premises systems.
+- [Enterprise connectors](managed.md#enterprise-connectors) that provide access to enterprise systems.
+- [Integration account connectors](managed.md#integration-account-connectors) that support business-to-business (B2B) communication scenarios.
+- [Integration service environment (ISE) connectors](managed.md#ise-connectors) that are a small group of [managed connectors available only for ISEs](#ise-and-connectors).
+
+## Connection configuration
+
+Most connectors require that you first create a *connection* to the target service or system before you can use its triggers or actions in your workflow. To create a connection, you have to authenticate your identity with account credentials and sometimes other connection information. For example, before your workflow can access and work with your Office 365 Outlook email account, you must authorize a connection to that account.
+
+### Connection security and encryption
+
+For connectors that use Azure Active Directory (Azure AD) OAuth, such as Office 365, Salesforce, or GitHub, you must sign into the service where your access token is [encrypted](../security/fundamentals/encryption-overview.md) and securely stored in an Azure secret. Other connectors, such as FTP and SQL, require a connection that has configuration details, such as the server address, username, and password. These connection configuration details are also [encrypted and securely stored in Azure](../security/fundamentals/encryption-overview.md).
+
+Established connections can access the target service or system for as long as that service or system allows. For services that use Azure AD OAuth connections, such as Office 365 and Dynamics, the Logic Apps service refreshes access tokens indefinitely. Other services might have limits on how long Logic Apps can use a token without refreshing. Some actions, such as changing your password, invalidate all access tokens.
+
+Although you create connections from within a workflow, connections are separate Azure resources with their own resource definitions. To review these connection resource definitions, [download your logic app from Azure into Visual Studio](../logic-apps/manage-logic-apps-with-visual-studio.md). This method is the easiest way to create a valid, parameterized logic app template that's mostly ready for deployment.
+
+> [!TIP]
+> If your organization doesn't permit you to access specific resources through Logic Apps connectors, you can [block the capability to create such connections](../logic-apps/block-connections-connectors.md) using [Azure Policy](../governance/policy/overview.md).
+
+<a name="firewall-access"></a>
+
+### Firewall access for connections
+
+If you use a firewall that limits traffic, and your logic app workflows need to communicate through that firewall, you have to set up your firewall to allow access for both the [inbound](../logic-apps/logic-apps-limits-and-config.md#inbound) and [outbound](../logic-apps/logic-apps-limits-and-config.md#outbound) IP addresses used by the Logic Apps service or runtime in the Azure region where your logic app workflows exist. If your workflows also use managed connectors, such as the Office 365 Outlook connector or SQL connector, or use custom connectors, your firewall also needs to allow access for *all* the [managed connector outbound IP addresses](../logic-apps/logic-apps-limits-and-config.md#outbound) in your logic app's Azure region. For more information, review [Firewall configuration](../logic-apps/logic-apps-limits-and-config.md#firewall-configuration-ip-addresses-and-service-tags).
+
+## Recurrence behavior
+
+Recurring built-in triggers, such as the [Recurrence trigger](connectors-native-recurrence.md), run natively on the Logic Apps runtime and differ from recurring connection-based triggers, such as the Office 365 Outlook connector trigger where you need to create a connection first.
+
+For both kinds of triggers, if a recurrence doesn't specify a specific start date and time, the first recurrence runs immediately when you save or deploy the logic app, despite your trigger's recurrence setup. To avoid this behavior, provide a start date and time for when you want the first recurrence to run.
+
+### Recurrence for built-in triggers
+
+Recurring built-in triggers follow the schedule that you set, including any specified time zone. However, if a recurrence doesn't specify other advanced scheduling options, such as specific times to run future recurrences, those recurrences are based on the last trigger execution. As a result, the start times for those recurrences might drift due to factors such as latency during storage calls.
+
+For more information, review the following documentation:
+
+* [Schedule and run recurring automated tasks, processes, and workflows with Azure Logic Apps](../logic-apps/concepts-schedule-automated-recurring-tasks-workflows.md)
+* [Create, schedule, and run recurring tasks and workflows with the Recurrence trigger](connectors-native-recurrence.md)
+* [Troubleshooting recurrence issues](#recurrence-issues)
+
+### Recurrence for connection-based triggers
+
+In recurring connection-based triggers, such as Office 365 Outlook, the schedule isn't the only driver that controls execution. The time zone only determines the initial start time. Subsequent runs depend on the recurrence schedule, the last trigger execution, and other factors that might cause run times to drift or produce unexpected behavior, for example:
+
+* Whether the trigger accesses a server that has more data, which the trigger immediately tries to fetch.
+* Any failures or retries that the trigger incurs.
+* Latency during storage calls.
+* Not maintaining the specified schedule when daylight saving time (DST) starts and ends.
+* Other factors that can affect when the next run time happens.
+
+For more information, review the following documentation:
+
+* [Schedule and run recurring automated tasks, processes, and workflows with Azure Logic Apps](../logic-apps/concepts-schedule-automated-recurring-tasks-workflows.md)
+* [Troubleshooting recurrence issues](#recurrence-issues)
+
+<a name="recurrence-issues"></a>
+
+### Troubleshooting recurrence issues
+
+To make sure that your workflow runs at your specified start time and doesn't miss a recurrence, especially when the frequency is in days or longer, try the following solutions:
+
+* When DST takes effect, manually adjust the recurrence so that your workflow continues to run at the expected time. Otherwise, the start time shifts one hour forward when DST starts and one hour backward when DST ends. For more information and examples, review [Recurrence for daylight saving time and standard time](../logic-apps/concepts-schedule-automated-recurring-tasks-workflows.md#daylight-saving-standard-time).
+
+* If you're using a **Recurrence** trigger, specify a time zone, a start date and time. In addition, configure specific times to run subsequent recurrences in the properties **At these hours** and **At these minutes**, which are available only for the **Day** and **Week** frequencies. However, some time windows might still cause problems when the time shifts.
+
+* Consider using a [**Sliding Window** trigger](connectors-native-sliding-window.md) instead of a **Recurrence** trigger to avoid missed recurrences.
+
+## Custom APIs and connectors
+
+To call APIs that run custom code or aren't available as connectors, you can extend the Logic Apps platform by [creating custom API Apps](../logic-apps/logic-apps-create-api-app.md). You can also [create custom connectors](../logic-apps/custom-connector-overview.md) for any REST or SOAP-based APIs, which make those APIs available to any logic app in your Azure subscription. To make custom API Apps or connectors public for anyone to use in Azure, you can [submit connectors for Microsoft certification](/connectors/custom-connectors/submit-certification).
+
+## ISE and connectors
+
+For workflows that need direct access to resources in an Azure virtual network, you can create a dedicated [integration service environment (ISE)](../logic-apps/connect-virtual-network-vnet-isolated-environment-overview.md) where you can build, deploy, and run your workflows on dedicated resources. For more information about creating ISEs, review [Connect to Azure virtual networks from Azure Logic Apps](../logic-apps/connect-virtual-network-vnet-isolated-environment.md).
+
+Custom connectors created within an ISE don't work with the on-premises data gateway. However, these connectors can directly access on-premises data sources that are connected to an Azure virtual network hosting the ISE. So, logic apps in an ISE most likely don't need the data gateway when communicating with those resources. If you have custom connectors that you created outside an ISE that require the on-premises data gateway, logic apps in an ISE can use those connectors.
+
+In the Logic Apps Designer, when you browse the built-in triggers and actions or managed connectors that you want to use for logic apps in an ISE, the **CORE** label appears on built-in triggers and actions, while the **ISE** label appears on managed connectors that are specifically designed to work with an ISE.
+
+:::row:::
+    :::column:::
+        ![Example CORE connector](./media/apis-list/example-core-connector.png)
+        \
+        \
+        **CORE**
+        \
+        \
+        Built-in triggers and actions with this label run in the same ISE as your logic apps.
+    :::column-end:::
+    :::column:::
+        ![Example ISE connector](./media/apis-list/example-ise-connector.png)
+        \
+        \
+        **ISE**
+        \
+        \
+        Managed connectors with this label run in the same ISE as your logic apps. 
+        \
+        \
+        If you have an on-premises system that's connected to an Azure virtual network, an ISE lets your workflows directly access that system without using the [on-premises data gateway](../logic-apps/logic-apps-gateway-connection.md). Instead, you can either use that system's **ISE** connector if available, an HTTP action, or a [custom connector](#custom-apis-and-connectors).
+        \
+        \
+        For on-premises systems that don't have **ISE** connectors, use the on-premises data gateway. To find available ISE connectors, review [ISE connectors](#ise-and-connectors).
+    :::column-end:::
+    :::column:::
+        ![Example non-ISE connector](./media/apis-list/example-multi-tenant-connector.png)
+        \
+        \
+        No label
+        \
+        \
+        All other connectors without a label, which you can continue to use, run in the global, multi-tenant Logic Apps service.
+    :::column-end:::
+    :::column:::
+    :::column-end:::
+:::row-end:::
+
+## Known issues
+
+The following table includes known issues for Logic Apps connectors.
+
+| Error message| Description | Resolution |
+|--------------|-------------|------------|
+| `Error: BadGateway. Client request id: '{GUID}'` | This error results from updating the tags on a logic app where one or more connections don't support Azure Active Directory (Azure AD) OAuth authentication, such as SFTP ad SQL, breaking those connections. | To prevent this behavior, avoid updating those tags. |
+||||
+
+## Next steps
+
+> [!div class="nextstepaction"]
+> [Create custom APIs you can call from Logic Apps](/logic-apps/logic-apps-create-api-app)

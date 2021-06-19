@@ -1,129 +1,282 @@
 ---
-title: Configure Azure Functions App Settings | Microsoft Docs
-description: Learn how to configure Azure function app settings.
-services: ''
-documentationcenter: .net
-author: rachelappel
-manager: erikre
-editor: ''
-
+title: Configure function app settings in Azure Functions
+description: Learn how to configure function app settings in Azure Functions.
 ms.assetid: 81eb04f8-9a27-45bb-bf24-9ab6c30d205c
-ms.service: functions
-ms.workload: na
-ms.tgt_pltfrm: dotnet
-ms.devlang: na
-ms.topic: article
-ms.date: 10/28/2016
-ms.author: rachelap
+ms.topic: conceptual
+ms.date: 04/13/2020
+ms.custom: cc996988-fb4f-47, devx-track-azurecli, devx-track-azurepowershell
+---
+
+# Manage your function app 
+
+In Azure Functions, a function app provides the execution context for your individual functions. Function app behaviors apply to all functions hosted by a given function app. All functions in a function app must be of the same [language](supported-languages.md). 
+
+Individual functions in a function app are deployed together and are scaled together. All functions in the same function app share resources, per instance, as the function app scales. 
+
+Connection strings, environment variables, and other application settings are defined separately for each function app. Any data that must be shared between function apps should be stored externally in a persisted store.
+
+## Get started in the Azure portal
+
+1. To begin, go to the [Azure portal] and sign in to your Azure account. In the search bar at the top of the portal, enter the name of your function app and select it from the list. 
+
+2. Under **Settings** in the left pane, select **Configuration**.
+
+    :::image type="content" source="./media/functions-how-to-use-azure-function-app-settings/azure-function-app-main.png" alt-text="Function app overview in the Azure portal":::
+
+You can navigate to everything you need to manage your function app from the overview page, in particular the **[Application settings](#settings)** and **[Platform features](#platform-features)**.
+
+## <a name="settings"></a>Work with application settings
+
+Application settings can be managed from the [Azure portal](functions-how-to-use-azure-function-app-settings.md?tabs=portal#settings) and by using the [Azure CLI](functions-how-to-use-azure-function-app-settings.md?tabs=azurecli#settings) and [Azure PowerShell](functions-how-to-use-azure-function-app-settings.md?tabs=powershell#settings). You can also manage application settings from [Visual Studio Code](functions-develop-vs-code.md#application-settings-in-azure) and from [Visual Studio](functions-develop-vs.md#function-app-settings). 
+
+These settings are stored encrypted. To learn more, see [Application settings security](security-concepts.md#application-settings).
+
+# [Portal](#tab/portal)
+
+To find the application settings, see [Get started in the Azure portal](#get-started-in-the-azure-portal). 
+
+The **Application settings** tab maintains settings that are used by your function app. You must select **Show values** to see the values in the portal. 
+To add a setting in the portal, select **New application setting** and add the new key-value pair.
+
+![Function app settings in the Azure portal.](./media/functions-how-to-use-azure-function-app-settings/azure-function-app-settings-tab.png)
+
+# [Azure CLI](#tab/azurecli)
+
+The [`az functionapp config appsettings list`](/cli/azure/functionapp/config/appsettings#az_functionapp_config_appsettings_list) command returns the existing application settings, as in the following example:
+
+```azurecli-interactive
+az functionapp config appsettings list --name <FUNCTION_APP_NAME> \
+--resource-group <RESOURCE_GROUP_NAME>
+```
+
+The [`az functionapp config appsettings set`](/cli/azure/functionapp/config/appsettings#az_functionapp_config_appsettings_set) command adds or updates an application setting. The following example creates a setting with a key named `CUSTOM_FUNCTION_APP_SETTING` and a value of `12345`:
+
+
+```azurecli-interactive
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> \
+--resource-group <RESOURCE_GROUP_NAME> \
+--settings CUSTOM_FUNCTION_APP_SETTING=12345
+```
+
+# [Azure PowerShell](#tab/powershell)
+
+The [`Get-AzFunctionAppSetting`](/powershell/module/az.functions/get-azfunctionappsetting) cmdlet returns the existing application settings, as in the following example: 
+
+```azurepowershell-interactive
+Get-AzFunctionAppSetting -Name <FUNCTION_APP_NAME> -ResourceGroupName <RESOURCE_GROUP_NAME>
+```
+
+The [`Update-AzFunctionAppSetting`](/powershell/module/az.functions/update-azfunctionappsetting) command adds or updates an application setting. The following example creates a setting with a key named `CUSTOM_FUNCTION_APP_SETTING` and a value of `12345`:
+
+```azurepowershell-interactive
+Update-AzFunctionAppSetting -Name <FUNCTION_APP_NAME> -ResourceGroupName <RESOURCE_GROUP_NAME> -AppSetting @{"CUSTOM_FUNCTION_APP_SETTING" = "12345"}
+```
 
 ---
-# How to configure Azure Function app settings
-## Settings overview
-You can manage Azure Function Apps settings by clicking the **Function App Settings** link in the bottom-left corner of the portal. Azure function app settings apply to all functions in the app.
 
-1. Go to the [Azure portal](http://portal.azure.com) and sign-in with your Azure account.
-2. Click **Function App Settings** in the bottom-left corner of the portal. This action reveals several configuration options to choose from. 
+### Use application settings
 
-![Azure Function App settings](./media/functions-how-to-use-azure-function-app-settings/azure-function-app-main.png)
+[!INCLUDE [functions-environment-variables](../../includes/functions-environment-variables.md)]
 
-## Memory size
-You can configure how much memory to allocate for your functions in the current function app. 
+When you develop a function app locally, you must maintain local copies of these values in the local.settings.json project file. To learn more, see [Local settings file](functions-run-local.md#local-settings-file).
 
-To configure memory, slide the slider to the desired amount of memory. The maximum is 128 MB.
+## Hosting plan type
 
-![Configure function app memory size](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-memory-size.png)
+When you create a function app, you also create a hosting plan in which the app runs. A plan can have one or more function apps. The functionality, scaling, and pricing of your functions depend on the type of plan. To learn more, see [Azure Functions hosting options](functions-scale.md).
 
-## Continuous integration
-You can integrate your Function App with GitHub, Visual Studio Team Services, and more.
+You can determine the type of plan being used by your function app from the Azure portal, or by using the Azure CLI or Azure PowerShell APIs. 
 
-1. Click the  **Configure continuous integration** link. This  opens a **Deployments** pane with options.
-2. Click **Setup** in the **Deployments** pane to reveal a **Deployment Source** pane with one option: Click **Choose Source** to show available sources. 
-3. Choose any of the deployment sources available: Visual Studio Team Services, OneDrive, Local Git Repository, GitHub, Bitbucket, DropBox, or an External Repository by clicking it. 
-   
-    ![Configure App Function's CI](./media/functions-how-to-use-azure-function-app-settings/configure-function-ci.png)
-4. Enter your credentials and information as prompted by the various deployment sources. The credentials and information requested may be slightly different depending on what source you have chosen. 
+The following values indicate the plan type:
 
-Once you have setup CI, connected code you push to the configured source is automatically deployed to this function app.
+| Plan type | Portal | Azure CLI/PowerShell |
+| --- | --- | --- |
+| [Consumption](consumption-plan.md) | **Consumption** | `Dynamic` |
+| [Premium](functions-premium-plan.md) | **ElasticPremium** | `ElasticPremium` |
+| [Dedicated (App Service)](dedicated-plan.md) | Various | Various |
 
-## Authentication/authorization
-For functions that use an HTTP trigger, you can require calls to be authenticated.
+# [Portal](#tab/portal)
 
-1. To configure authentication click the **Configure authentication** link.
-2. Toggle the **App Service Authentication** button to **On**.
+To determine the type of plan used by your function app, see **App Service plan** in the **Overview** tab for the function app in the [Azure portal](https://portal.azure.com). To see the pricing tier, select the name of the **App Service Plan**, and then select **Properties** from the left pane.
 
-![Configure App Function's CI](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-authentication.png)
+![View scaling plan in the portal](./media/functions-scale/function-app-overview-portal.png)
 
-Most authentication providers ask for an API Key/Client ID and a Secret; however, both the Microsoft Account and Facebook options also allow you to define scopes (specific authorization credentials). Active Directory has several express or advanced configuration settings you can set.
+# [Azure CLI](#tab/azurecli)
 
-For details on configuring specific authentication providers, see 
-[Azure App Service authentication overview](../app-service/app-service-authentication-overview.md).
+Run the following Azure CLI command to get your hosting plan type:
 
-## CORS
-Normally, for security reasons, calls to your hosts (domains) from external sources, such as Ajax calls from a browser, are not allowed. Otherwise, malicious code could be sent to and executed on the backend. The safest route then is to blacklist all sources of code, except for a few of your own trusted ones. You can configure which sources you accept calls from in Azure functions by configuring Cross-Origin Resource Sharing (CORS). CORS allows you to list domains that are the source of JavaScript that can call functions in your Azure Function App. 
+```azurecli-interactive
+functionApp=<FUNCTION_APP_NAME>
+resourceGroup=FunctionMonitoringExamples
+appServicePlanId=$(az functionapp show --name $functionApp --resource-group $resourceGroup --query appServicePlanId --output tsv)
+az appservice plan list --query "[?id=='$appServicePlanId'].sku.tier" --output tsv
 
-1. To configure CORS, click the **Configure CORS** link. 
-2. Enter the domains that you want to whitelist.
+```  
 
-![Configure App Function's CORS](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-cors.png)
+In the previous example replace `<RESOURCE_GROUP>` and `<FUNCTION_APP_NAME>` with the resource group and function app names, respective. 
 
-## API definition
-Allow clients to more easily consume your HTTP-triggered functions.
+# [Azure PowerShell](#tab/powershell)
 
-1. To set up an API, click **Configure API metadata**. 
-2. Enter the URL that points to a Swagger json file.
+Run the following Azure PowerShell command to get your hosting plan type:
 
-![Configure App Function's API](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-apidef.png)
+```azurepowershell-interactive
+$FunctionApp = '<FUNCTION_APP_NAME>'
+$ResourceGroup = '<RESOURCE_GROUP>'
 
-For more information on creating API definitions with Swagger, visit [Get Started with API Apps, ASP.NET, and Swagger in Azure](../app-service-api/app-service-api-dotnet-get-started.md).
+$PlanID = (Get-AzFunctionApp -ResourceGroupName $ResourceGroup -Name $FunctionApp).AppServicePlan
+(Get-AzFunctionAppPlan -Name $PlanID -ResourceGroupName $ResourceGroup).SkuTier
+```
+In the previous example replace `<RESOURCE_GROUP>` and `<FUNCTION_APP_NAME>` with the resource group and function app names, respective. 
 
-## Application settings
-Manage environment variables, Framework versions, remote debugging, app settings, connection strings, default docs, etc. These settings are specific to your Function App. 
+---
 
-To configure app settings, click the **Configure App Settings** link. 
+## Plan migration
 
-![Configure App Settings](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-settings.png)
+You can use Azure CLI commands to migrate a function app between a Consumption plan and a Premium plan on Windows. The specific commands depend on the direction of the migration. Direct migration to a Dedicated (App Service) plan isn't currently supported.
 
-## In-portal console
-You can execute DOS style commands with the Azure functions in-portal console. Common commands include directory and file creation and navigation, as well as executing batch files and scripts. 
+This migration isn't supported on Linux.
+
+### Consumption to Premium
+
+Use the following procedure to migrate from a Consumption plan to a Premium plan on Windows:
+
+1. Run the following command to create a new App Service plan (Elastic Premium) in the same region and resource group as your existing function app.  
+
+    ```azurecli-interactive
+    az functionapp plan create --name <NEW_PREMIUM_PLAN_NAME> --resource-group <MY_RESOURCE_GROUP> --location <REGION> --sku EP1
+    ```
+
+1. Run the following command to migrate the existing function app to the new Premium plan
+
+    ```azurecli-interactive
+    az functionapp update --name <MY_APP_NAME> --resource-group <MY_RESOURCE_GROUP> --plan <NEW_PREMIUM_PLAN>
+    ```
+
+1. If you no longer need your previous Consumption function app plan, delete your original function app plan after confirming you have successfully migrated to the new one. Run the following command to get a list of all Consumption plans in your resource group.
+
+    ```azurecli-interactive
+    az functionapp plan list --resource-group <MY_RESOURCE_GROUP> --query "[?sku.family=='Y'].{PlanName:name,Sites:numberOfSites}" -o table
+    ```
+
+    You can safely delete the plan with zero sites, which is the one you migrated from.
+
+1. Run the following command to delete the Consumption plan you migrated from.
+
+    ```azurecli-interactive
+    az functionapp plan delete --name <CONSUMPTION_PLAN_NAME> --resource-group <MY_RESOURCE_GROUP>
+    ```
+
+### Premium to Consumption
+
+Use the following procedure to migrate from a Premium plan to a Consumption plan on Windows:
+
+1. Run the following command to create a new function app (Consumption) in the same region and resource group as your existing function app. This command also creates a new Consumption plan in which the function app runs.
+
+    ```azurecli-interactive
+    az functionapp create --resource-group <MY_RESOURCE_GROUP> --name <NEW_CONSUMPTION_APP_NAME> --consumption-plan-location <REGION> --runtime dotnet --functions-version 3 --storage-account <STORAGE_NAME>
+    ```
+
+1. Run the following command to migrate the existing function app to the new Consumption plan.
+
+    ```azurecli-interactive
+    az functionapp update --name <MY_APP_NAME> --resource-group <MY_RESOURCE_GROUP> --plan <NEW_CONSUMPTION_PLAN>
+    ```
+
+1. Delete the function app you created in step 1, since you only need the plan that was created to run the existing function app.
+
+    ```azurecli-interactive
+    az functionapp delete --name <NEW_CONSUMPTION_APP_NAME> --resource-group <MY_RESOURCE_GROUP>
+    ```
+
+1. If you no longer need your previous Premium function app plan, delete your original function app plan after confirming you have successfully migrated to the new one. Please note that if the plan is not deleted, you will still be charged for the Premium plan. Run the following command to get a list of all Premium plans in your resource group.
+
+    ```azurecli-interactive
+    az functionapp plan list --resource-group <MY_RESOURCE_GROUP> --query "[?sku.family=='EP'].{PlanName:name,Sites:numberOfSites}" -o table
+    ```
+
+1. Run the following command to delete the Premium plan you migrated from.
+
+    ```azurecli-interactive
+    az functionapp plan delete --name <PREMIUM_PLAN> --resource-group <MY_RESOURCE_GROUP>
+    ```
+
+## Platform features
+
+Function apps run in, and are maintained by, the Azure App Service platform. As such, your function apps have access to most of the features of Azure's core web hosting platform. The left pane is where you access the many features of the App Service platform that you can use in your function apps. 
 
 > [!NOTE]
-> You can upload scripts, but first you must configure an FTP client in the Azure Function's **Advanced Settings**.
-> 
-> 
+> Not all App Service features are available when a function app runs on the Consumption hosting plan.
 
-To open the In-portal console, click **Open dev console**.
+The rest of this article focuses on the following App Service features in the Azure portal that are useful for Functions:
 
-![Configure function app memory size](./media/functions-how-to-use-azure-function-app-settings/configure-function-console.png)
++ [App Service editor](#editor)
++ [Console](#console)
++ [Advanced tools (Kudu)](#kudu)
++ [Deployment options](#deployment)
++ [CORS](#cors)
++ [Authentication](#auth)
 
-> [!NOTE]
-> Working in a console with ASCII art like that makes you look cool.
-> 
-> 
+For more information about how to work with App Service settings, see [Configure Azure App Service Settings](../app-service/configure-common.md).
 
-## Kudu
-Kudu allows you to access advanced administrative features of a Function App.
+### <a name="editor"></a>App Service editor
 
-To open Kudu, click **Go to Kudu**. This action opens an entirely new browser window with the Kudu web admin.
+![The App Service editor](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-appservice-editor.png)
 
-> [!NOTE]
-> You can alternatively launch **Kudu** by inserting "scm" into your function's URL, as shown here: ```https://<YourFunctionName>.scm.azurewebsites.net/```
-> 
-> 
+The App Service editor is an advanced in-portal editor that you can use to modify JSON configuration files and code files alike. Choosing this option launches a separate browser tab with a basic editor. This enables you to integrate with the Git repository, run and debug code, and modify function app settings. This editor provides an enhanced development environment for your functions compared with the built-in function editor.  
 
-From the Kudu webpage, you can view and manage system information, app settings, environment variables, HTTP headers, server variables, and more.
+We recommend that you consider developing your functions on your local computer. When you develop locally and publish to Azure, your project files are read-only in the portal. To learn more, see [Code and test Azure Functions locally](functions-develop-local.md).
+
+### <a name="console"></a>Console
+
+![Function app console](./media/functions-how-to-use-azure-function-app-settings/configure-function-console.png)
+
+The in-portal console is an ideal developer tool when you prefer to interact with your function app from the command line. Common commands include directory and file creation and navigation, as well as executing batch files and scripts. 
+
+When developing locally, we recommend using the [Azure Functions Core Tools](functions-run-local.md) and the [Azure CLI].
+
+### <a name="kudu"></a>Advanced tools (Kudu)
 
 ![Configure Kudu](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-kudu.png)
 
-## Advanced settings
-Manage your function app like any other App Service instance. This option gives you access to all the previously discussed settings, plus several more.  
+The advanced tools for App Service (also known as Kudu) provide access to advanced administrative features of your function app. From Kudu, you manage system information, app settings, environment variables, site extensions, HTTP headers, and server variables. You can also launch **Kudu** by browsing to the SCM endpoint for your function app, like `https://<myfunctionapp>.scm.azurewebsites.net/` 
 
-To open advanced settings, click the **Advanced Settings** link. 
 
-![Configure App Service Settings](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-appservice-settings.png)
+### <a name="deployment"></a>Deployment Center
 
-For details on how to configure each App Service setting, see 
-[Configure Azure App Service Settings](../app-service-web/web-sites-configure.md).
+When you use a source control solution to develop and maintain your functions code, Deployment Center lets you build and deploy from source control. Your project is built and deployed to Azure when you make updates. For more information, see [Deployment technologies in Azure Functions](functions-deployment-technologies.md).
+
+### <a name="cors"></a>Cross-origin resource sharing
+
+To prevent malicious code execution on the client, modern browsers block requests from web applications to resources running in a separate domain. [Cross-origin resource sharing (CORS)](https://developer.mozilla.org/docs/Web/HTTP/CORS) lets an `Access-Control-Allow-Origin` header declare which origins are allowed to call endpoints on your function app.
+
+#### Portal
+
+When you configure the **Allowed origins** list for your function app, the `Access-Control-Allow-Origin` header is automatically added to all responses from HTTP endpoints in your function app. 
+
+![Configure function app's CORS list](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-cors.png)
+
+When the wildcard (`*`) is used, all other domains are ignored. 
+
+Use the [`az functionapp cors add`](/cli/azure/functionapp/cors#az_functionapp_cors_add) command to add a domain to the allowed origins list. The following example adds the contoso.com domain:
+
+```azurecli-interactive
+az functionapp cors add --name <FUNCTION_APP_NAME> \
+--resource-group <RESOURCE_GROUP_NAME> \
+--allowed-origins https://contoso.com
+```
+
+Use the [`az functionapp cors show`](/cli/azure/functionapp/cors#az_functionapp_cors_show) command to list the current allowed origins.
+
+### <a name="auth"></a>Authentication
+
+![Configure authentication for a function app](./media/functions-how-to-use-azure-function-app-settings/configure-function-app-authentication.png)
+
+When functions use an HTTP trigger, you can require calls to first be authenticated. App Service supports Azure Active Directory authentication and sign-in with social providers, such as Facebook, Microsoft, and Twitter. For details on configuring specific authentication providers, see [Azure App Service authentication overview](../app-service/overview-authentication-authorization.md). 
+
 
 ## Next steps
-[!INCLUDE [Getting Started Note](../../includes/functions-get-help.md)]
 
++ [Configure Azure App Service Settings](../app-service/configure-common.md)
++ [Continuous deployment for Azure Functions](functions-continuous-deployment.md)
+
+[Azure CLI]: /cli/azure/
+[Azure portal]: https://portal.azure.com

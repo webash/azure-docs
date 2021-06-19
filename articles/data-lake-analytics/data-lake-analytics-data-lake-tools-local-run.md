@@ -1,374 +1,103 @@
 ---
-title: Test and debug U-SQL jobs using local-run and the Azure Data Lake U-SQL SDK | Microsoft Docs
-description: 'Learn how to use Azure Data Lake Tools for Visual Studio and Azure Data Lake U-SQL SDK to test and debug U-SQL jobs on your local workstation.'
-services: data-lake-analytics
-documentationcenter: ''
-author: mumian
-manager: jhubbard
-editor: cgronlun
-
-ms.assetid: 66dd58b1-0b28-46d1-aaae-43ee2739ae0a
+title: Run Azure Data Lake U-SQL scripts on your local machine
+description: Learn how to use Azure Data Lake Tools for Visual Studio to run U-SQL jobs on your local machine.
+author: liudan66
+ms.author: liud
+ms.reviewer: jasonh
 ms.service: data-lake-analytics
-ms.devlang: na
-ms.topic: article
-ms.tgt_pltfrm: na
-ms.workload: big-data
-ms.date: 11/15/2016
-ms.author: jgao
-
+ms.topic: how-to
+ms.date: 07/03/2018
 ---
-# Test and debug U-SQL jobs using local-run and the Azure Data Lake U-SQL SDK
+# Run U-SQL scripts on your local machine
 
-Learn how to use Azure Data Lake Tools for Visual Studio and Azure Data Lake U-SQL SDK to test and debug U-SQL jobs on your local workstation.  These two local-run features make it possible to run U-SQL jobs on your workstation just as you can in the Azure Data Lake Service. These features save you time for testing and debugging your U-SQL jobs.
+When you develop U-SQL scripts, you can save time and expense by running the scripts locally. Azure Data Lake Tools for Visual Studio supports running U-SQL scripts on your local machine. 
 
-Prerequisites: 
+## Basic concepts for local runs
 
-- An Azure Data Lake Analytics account. See [Get started with Azure Data Lake Analytics](data-lake-analytics-get-started-portal.md). 
-- The Azure Data Lake Tools for Visual Studio.  See [Develop U-SQL scripts using Data Lake Tools for Visual Studio](data-lake-analytics-data-lake-tools-get-started.md). 
-- The U-SQL script development experience. See [Get started with Azure Data Lake Analytics](data-lake-analytics-get-started-portal.md). 
+The following chart shows the components for local run and how these components map to cloud run.
 
+|Component|Local run|Cloud run|
+|---------|---------|---------|
+|Storage|Local data root folder|Default Azure Data Lake Store account|
+|Compute|U-SQL local run engine|Azure Data Lake Analytics service|
+|Run environment|Working directory on local machine|Azure Data Lake Analytics cluster|
 
-## Understand data-root and file path
+The sections that follow provide more information about local run components.
 
-Both local-run and the U-SQL SDK requires a data-root folder. Data-root is a "local store" for the local compute account. It is equivalent to the Data Lake Store account of a Data Lake Analytics account in Azure. Switching to a different data-root folder is just like switching to a different store account. If you want to access commonly shared data with different data-root folders, you must use absolute paths in your scripts or to create file system symbolic links (for example, mklink on NTFS) under this data-root folder which point to the shared data. 
+### Local data root folders
 
-The data-root folder is used for:
+A local data root folder is a **local store** for the local compute account. Any folder in the local file system on your local machine can be a local data root folder. It's the same as the default Azure Data Lake Store account of a Data Lake Analytics account. Switching to a different data root folder is just like switching to a different default store account. 
 
-- Store metadata including databases, tables, TVFs, assemblies, etc.
-- Look up the input and output paths that are defined as relative paths in U-SQL. Using relative paths makes it easier to deploy your U-SQL projects to Azure.
+The data root folder is used as follows:
+- Store metadata. Examples are databases, tables, table-valued functions, and assemblies.
+- Look up the input and output paths that are defined as relative paths in U-SQL scripts. By using relative paths, it's easier to deploy your U-SQL scripts to Azure.
 
-You can use both relative path and local absolute path in U-SQL scripts, and the relative path is relative to the specified data-root folder path. It is recommended to use "/" as the path separator to make your scripts compatible with the server side. Here are some examples of relative paths and their equivalent absolute path. In these examples, "C:\LocalRunDataRoot" is the data-root:
+### U-SQL local run engines
 
-|Relative path|Absolute path|
-|-------------|-------------|
-|/abc/def/input.csv |C:\LocalRunDataRoot\abc\def\input.csv|
-|abc/def/input.csv  |C:\LocalRunDataRoot\abc\def\input.csv|
-|D:/abc/def/input.csv |D:\abc\def\input.csv|
+A U-SQL local run engine is a **local compute account** for U-SQL jobs. Users can run U-SQL jobs locally through Azure Data Lake Tools for Visual Studio. Local runs are also supported through the Azure Data Lake U-SQL SDK command-line and programming interfaces. Learn more about the [Azure Data Lake U-SQL SDK](https://www.nuget.org/packages/Microsoft.Azure.DataLake.USQL.SDK/).
 
-## Use local-run from Visual Studio
+### Working directories
 
-The Data Lake Tools for Visual Studio provides U-SQL local-run experience in Visual Studio. Using this feature, you can:
+When you run a U-SQL script, a working directory folder is needed to cache compilation results, run logs, and perform other functions. In Azure Data Lake Tools for Visual Studio, the working directory is the U-SQL project’s working directory. It's located under `<U-SQL project root path>/bin/debug>`. The working directory is cleaned every time a new run is triggered.
 
-- Run U-SQL script locally, along with C# assemblies.
-- Debug C# assembly locally.
-- Create, view, and delete U-SQL catalogs (local databases, assemblies, schemas, and tables) from Server Explorer. The local catalog also can be found from Server Explorer.
+## Local runs in Microsoft Visual Studio
 
-    ![Data Lake Tools for Visual Studio local-run local catalog](./media/data-lake-analytics-data-lake-tools-local-run/data-lake-tools-for-visual-studio-local-run-local-catalog.png)
+Azure Data Lake Tools for Visual Studio have a built-in local run engine. The tools surface the engine as a local compute account. To run a U-SQL script locally, select the **Local-machine** or **Local-project** account in the script’s editor margin drop-down menu. Then select **Submit**.
 
-Data Lake Tools installer creates a "C:\LocalRunRoot" folder to be used as the default data-root folder. The default local-run parallelism is 1. 
-
-### To configure local-run in Visual Studio
-
-1. Open Visual Studio.
-2. Open **Server Explorer**.
-3. Expand **Azure**, **Data Lake Analytics**.
-4. Click the **Data Lake** menu, and then click **Options and Settings**. 
-5. On the left tree, expand **Azure Data Lake**, and then expand **General**.
-
-    ![Data Lake Tools for Visual Studio local-run configure settings](./media/data-lake-analytics-data-lake-tools-local-run/data-lake-tools-for-visual-studio-local-run-configure.png)
-
-A Visual Studio U-SQL project is required for performing local-run. This part is different from running U-SQL scripts from Azure.
-
-### To run a U-SQL script locally
-1. From Visual Studio, open your U-SQL project.   
-2. Right-click a U-SQL script in Solution Explorer, and then click **Submit Script**. Select (local) as the Analytics Account to run your script locally.
-3. You can also click (local) account on the top of script window, then click **Submit** (or use the **CTRL + F5** hotkey).
-
-    ![Data Lake Tools for Visual Studio local-run submit jobs](./media/data-lake-analytics-data-lake-tools-local-run/data-lake-tools-for-visual-studio-local-run-submit-job.png)
-
-
-
-## Use local-run from Data Lake U-SQL SDK
+![Submit a U-SQL script to a local account](./media/data-lake-analytics-data-lake-tools-local-run/data-lake-tools-submit-script-to-local-account.png) 
  
-In addition to running U-SQL scripts locally using Visual Studio, you can also use Azure Data Lake U-SQL SDK to run U-SQL scripts locally with command line and programming interfaces, through which you can scale your U-SQL local test.
+## Local runs with a Local-machine account
 
-### Install the SDK
+A **Local-machine** account is a shared local compute account with a single local data root folder as the local store account. By default, the data root folder is located at **C:\Users\<username>\AppData\Local\USQLDataRoot**. It's also configurable through **Tools** > **Data Lake** > **Options and Settings**.
 
-The Data Lake U-SQL SDK requires the following dependencies:
+![Configure a local data root folder](./media/data-lake-analytics-data-lake-tools-local-run/data-lake-tools-configure-local-data-root.png)
+  
+A U-SQL project is required for a local run. The U-SQL project’s working directory is used for the U-SQL local run working directory. Compilation results, run logs, and other job run-related files are generated and stored under the working directory folder during the local run. Every time you rerun the script, all the files in the working directory are cleaned and regenerated.
 
-- [Microsoft .Net Framework 4.6 or newer](https://www.microsoft.com/en-us/download/details.aspx?id=17851).
-- Microsoft Visual C++ 14 and Windows SDK 10.0.10240.0 or newer. There are 2 possible ways to get this:
+## Local runs with a Local-project account
 
-    - Install Visual Studio ([Visual Studio Community Edition](https://developer.microsoft.com/downloads/vs-thankyou)). You shall have a "\Windows Kits\10" folder under the program files folder, for example, "C:\Program Files (x86)\Windows Kits\10\"; you shall also find the Windows 10 SDK version under "\Windows Kits\10\Lib". If you don’t see these folders, re-install Visual Studio and make sure you have Windows 10 SDK checked when installing. The U-SQL local compiler script will find these dependencies automatically through this way.
+A **Local-project** account is a project-isolated local compute account for each project with an isolated local data root folder. Every active U-SQL project that opens in Solution Explorer in Visual Studio has a corresponding `(Local-project: <project name>)` account. The accounts are listed in both Server Explorer in Visual Studio and the U-SQL script editor margin.  
 
-    ![Data Lake Tools for Visual Studio local-run Windows 10 SDK](./media/data-lake-analytics-data-lake-tools-local-run/data-lake-tools-for-visual-studio-local-run-windows-10-sdk.png)
- 
-    - Alternatively, install the [Data Lake Tools for Visual Studio](http://aka.ms/adltoolsvs). The prepackaged VC++ and Windows SDK files can be found at 
-	C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\ADL Tools\X.X.XXXX.X\CppSDK. In this case, the U-SQL local compiler can not find the dependencies automatically, you need to specify CppSDK path for it. You can either copy the files to another location or just use it as is. Then, you can choose to either set an environment variable "SCOPE_CPP_SDK" to the directory, or to specify "-CppSDK" argument with this directory on the command line of the local-run helper application. 
+The **Local-project** account provides a clean and isolated development environment. A **Local-machine** account has a shared local data root folder that stores metadata and input and output data for all local jobs. But a **Local-project** account creates a temporary local data root folder under a U-SQL project working directory every time a U-SQL script is run. This temporary data root folder is cleaned when a rebuild or rerun happens. 
 
-After you have installed the SDK, you must perform the following configuration steps:
+A U-SQL project manages the isolated local run environment through a project reference and property. You can configure the input data sources for U-SQL scripts in both the project and the referenced database environments.
 
-- Set the **SCOPE_CPP_SDK** environment variable
+### Manage the input data source for a Local-project account 
 
-    If you get Microsoft Visual C++ and Windows SDK by installing the Data Lake Tools for Visual Studio, verify that you have the following folder:
+A U-SQL project creates a local data root folder and sets up data for a **Local-project** account. A temporary data root folder is cleaned and recreated under the U-SQL project working directory every time a rebuild and local run happens. All data sources that are configured by the U-SQL project are copied to this temporary local data root folder before the local job runs. 
 
-        C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Microsoft Azure Data Lake Tools for Visual Studio 2015\X.X.XXXX.X\CppSDK
+You can configure the root folder of your data sources. Right-click **U-SQL project** > **Property** > **Test Data Source**. When you run a U-SQL script on a **Local-project** account, all files and subfolders in the **Test Data Source** folder are copied to the temporary local data root folder. Files under subfolders are included. After a local job runs, output results can also be found under the temporary local data root folder in the project working directory. All this output is deleted and cleaned when the project gets rebuilt and cleaned. 
 
-    Define a new environment variable called "SCOPE_CPP_SDK" to point to this directory. Or copy the folder to other location and specify "SCOPE_CPP_SDK" as that.
+![Configure a project's test data source](./media/data-lake-analytics-data-lake-tools-local-run/data-lake-tools-configure-project-test-data-source.png)
 
-    In addition to setting the environment variable, you can also specify the "-CppSDK" argument when using command line. This argument overwrites your default CppSDK environment variable. 
+### Manage a referenced database environment for a **Local-project** account 
 
-- Set the **LOCALRUN_DATAROOT** environment variable
+If a U-SQL query uses or queries with U-SQL database objects, you must make the database environments ready locally before you run the U-SQL script locally. For a **Local-project** account, U-SQL database dependencies can be managed by U-SQL project references. You can add U-SQL database project references to your U-SQL project. Before running U-SQL scripts on a **Local-project** account, all referenced databases are deployed to the temporary local data root folder. And for each run, the temporary data root folder is cleaned as a fresh isolated environment.
 
-    Define a new environment variable called "LOCALRUN_DATAROOT" pointing to the data root. 
+See this related article:
+* Learn how to manage U-SQL database definitions and references in [U-SQL database projects](data-lake-analytics-data-lake-tools-develop-usql-database.md).
 
-    In addition to setting the environment variable, you can also specify the "-DataRoot" argument with the data-root path when using command line. This argument overwrites your default Data Root environment variable. And you need to add this argument to every command line you are executing so that you can use the same new overwrite Data Root for all operations. 
+## The difference between **Local-machine** and **Local-project** accounts
 
-### Using the SDK from Command Line
+A **Local-machine** account simulates an Azure Data Lake Analytics account on users’ local machines. It shares the same experience with an Azure Data Lake Analytics account. A **Local-project** account provides a user-friendly local development environment. This environment helps users deploy database references and input data before they run scripts locally. A **Local-machine** account provides a shared permanent environment that can be accessed through all projects. A **Local-project** account provides an isolated development environment for each project. It's refreshed for each run. A **Local-project** account offers a faster development experience by quickly applying new changes.
 
-#### The Command Line Interface of the Helper Application
+More differences between **Local-machine** and **Local-project** accounts are shown in the following table:
 
-The LocalRunHelper.exe of the SDK is the command line helper application that provides interfaces to most of the commonly used local-run functions. And please note that both the command and the arguments switches are case-sensitive. To invoke it:
+|Difference angle|Local-machine|Local-project|
+|----------------|---------------|---------------|
+|Local access|Can be accessed by all projects.|Only the corresponding project can access this account.|
+|Local data root folder|A permanent local folder. Configured through **Tools** > **Data Lake** > **Options and Settings**.|A temporary folder created for each local run under the U-SQL project working directory. The folder gets cleaned when a rebuild or rerun happens.|
+|Input data for a U-SQL script|The relative path under the permanent local data root folder.|Set through **U-SQL project property** > **Test Data Source**. All files and subfolders are copied to the temporary data root folder before a local run.|
+|Output data for a U-SQL script|Relative path under the permanent local data root folder.|Output to the temporary data root folder. The results are cleaned when a rebuild or rerun happens.|
+|Referenced database deployment|Referenced databases aren't deployed automatically when running against a **Local-machine** account. It's the same for submitting to an Azure Data Lake Analytics account.|Referenced databases are deployed to the **Local-project** account automatically before a local run. All database environments are cleaned and redeployed when a rebuild or rerun happens.|
 
-    LocalRunHelper.exe <command> <Required-Command-Arguments> [Optional-Command-Arguments]
+## A local run with the U-SQL SDK
 
-Run "LocalRunHelper.exe" without arguments or with the **help** switch to show the help information:
+You can run U-SQL scripts locally in Visual Studio and also use the Azure Data Lake U-SQL SDK to run U-SQL scripts locally with command-line and programming interfaces. Through these interfaces, you can automate U-SQL local runs and tests.
 
-    > LocalRunHelper.exe help
+Learn more about the [Azure Data Lake U-SQL SDK](data-lake-analytics-u-sql-sdk.md).
 
-        Command 'help' :  Show usage information
-        Command 'compile' :  Compile the script
-        Required Arguments :
-            -Script param
-                    Script File Path
-        Optional Arguments :
-            -Shallow [default value 'False']
-                    Shallow compile
+## Next steps
 
-In the help information: 
-
--  **Command**  gives the command’s name.  
--  **Required Argument**  lists arguments that must be supplied.  
--  **Optional Argument**  lists arguments that are optional and with default values.  Optional bool arguments don’t have parameter and their appearances mean negative to their default value.
-
-#### Return Value and Logging
-
-The helper application returns **0** in the case of success and **-1** in the case of failure. By default, the helper will output all messages to the current console.  However, most of the commands support **-MessageOut path_to_log_file** optional argument that will redirect the outputs to a log file.
-
-
-### The SDK Usage Samples
-
-#### Compile and Run
-
-The "run" command is used to compile the script and then execute compiled results. Its command line arguments are combination of those from "compile" and "run".
-
-    LocalRunHelper run -Script path_to_usql_script.usql [optional_arguments]
-
-Here is an example:
-
-    LocalRunHelper run -Script d:\test\test1.usql -WorkDir d:\test\bin -CodeBehind -References "d:\asm\ref1.dll;d:\asm\ref2.dll" -UseDatabase testDB –Parallel 5 -Verbose
-
-Besides of combining "compile" and "run" together, you can compile and execute the compiled executables separately. 
-
-#### Compile U-SQL Script
-
-The "compile" command is used to compile a U-SQL script to executables. 
-
-    LocalRunHelper compile -Script path_to_usql_script.usql [optional_arguments]
-
-Optional arguments for compilation, you can find more about working directory (-WorkDir) in appendix.
-
-|Argument|Description|
-|--------|-----------|
-|-CppSDK [default value '']|CppSDK Directory|
-|-DataRoot [default value '']|DataRoot for data and metadata, default to 'LOCALRUN_DATAROOT' environment variable|
-|-MessageOut [default value '']|Dump messages on console to a file|
-|-Shallow [default value 'False']|Shallow compile, does only a syntax check of the script and return.|
-|-WorkDir [default value 'D:\localrun\t\ScopeWorkDir']|Directory for compiler usage and outputs, see more in Appendix – Working Directory.|
-
-Optional arguments for assemblies and code-behind:
-
-|Argument|Description|
-|--------|-----------|
-|-CodeBehind [default value 'False']|The script has .cs code behind which will be compiled and registered automatically as UDO object|
-|-References [default value '']|List of paths to extra reference assemblies or data files of code behind, separated by ';'|
-|-UseDatabase [default value 'master']|Database to use for code behind temporary assembly registration|
-|-UdoRedirect [default value 'False']|Generate Udo assembly redirect config that tells the .Net runtime to probe dependent assemblies from the compiled output directory first when UDO is called|
-
-Here are some usage examples:
-
-Compile U-SQL script:
-
-	LocalRunHelper compile -Script d:\test\test1.usql
-
-Compile U-SQL script and set data-root folder, note that this will overwrite the set environment variable.
-
-	LocalRunHelper compile -Script d:\test\test1.usql –DataRoot c:\DataRoot
-
-Compile U-SQL script and set working directory, reference assembly and database.
-
-	LocalRunHelper compile -Script d:\test\test1.usql -WorkDir d:\test\bin -References "d:\asm\ref1.dll;d:\asm\ref2.dll" -UseDatabase testDB
-
-#### Execute Compiled Result
-
-The "execute" command is used to execute compiled results.   
-
-	LocalRunHelper execute -Algebra path_to_compiled_algebra_file [optional_arguments]
-
-Optional arguments:
-
-|Argument|Description|
-|--------|-----------|
-|-DataRoot [default value '']|DataRoot for metadata execution, default to 'LOCALRUN_DATAROOT' environment variable|
-|-MessageOut [default value '']|Dump messages on console to a file|
-|-Parallel [default value '1']|Run the generated local-run steps with the specified parallelism level|
-|-Verbose [default value 'False']|Show detailed outputs from runtime|
-
-Here are a usage example:
-
-	LocalRunHelper execute -Algebra d:\test\workdir\C6A101DDCB470506\Script_66AE4909AA0ED06C\__script__.abr –DataRoot c:\DataRoot –Parallel 5
-
-## Using the SDK with Programming Interface
-
-The programming interface are all located in the “Microsoft.Analytics.LocalRun” assembly, through which you can integrate the functionality of U-SQL SDK and C# test framework to scale your U-SQL script local test, a new doc for this is coming soon. See appendix for more information about the interfaces.
-
-## Appendix
-
-### Working Directory
-
-When local running the U-SQL script, a working directory is created during compilation.  In addition to the compilation outputs, the needed runtime files for local execution will also be shadow copied to this working directory.   If **-WorkDir** argument is not given on the command line, the default working directory “ScopeWorkDir” will be created under current directory. The files under working directory are shown as below.
-
-|Directory/File|Definition|Description|
-|--------------|----------|-----------|
-|ScopeWorkDir|The working directory|root folder|
-|C6A101DDCB470506|Hash string of runtime version|Shadow copy of runtime files needed for local execution|
-|\.\Script_66AE4909AA0ED06C|Script name + hash string of script path|Compilation outputs and execution step logging|
-|\.\.\\_\_script\_\_.abr|Compiler Output|The Algebra file|
-|\.\.\\_\_ScopeCodeGen\_\_.*|Compiler Output|Generated managed code|
-|\.\.\\_\_ScopeCodeGenEngine\_\_.*|Compiler Output|Generated native code|
-|\.\.\referenced_assemblies|Assembly Reference|REFERENCE ASSEMBLY files|
-|\.\.\deployed_resources|Resource Deployment|RESOURCE DEPLOYMENT files|
-|\.\.\xxxxxxxx.xxx[1..n]_*.*|Execution Log|Log of execution steps|
-
-### Programming Interfaces for Azure Data Lake U-SQL SDK
-
-The programming interface are all located in the “Microsoft.Analytics.LocalRun” assembly.
-
-#### Microsoft.Analytics.LocalRun.Configuration
-Compilation configuration parameter class
-
-**Constructor**
-
-public Configuration(string rootPath)
-
-|Parameter|Type|Description|
-|---------|----|-----------|
-|rootPath|System.String|Path to current directory of working context. If WorkingDirectory is not set, the default working directory will be rootPath + "ScopeWorkDir".|
-
-**Properties**
-
-|Name|Description|
-|----|-----------|
-|CppSDK|Where to find Cpp SDK, default to use system default configuration |
-|DataDirectory|Where tables and assemblies and input output data are saved, default to ScopeWorkDir\DataDir |
-|GenerateUdoRedirect|If we want to generate assembly loading redirection override config|
-|WorkingDirectory|Compiler's working directory, default to ScopeWorkDir if not set|
-
-
-#### Microsoft.Analytics.LocalRun.LocalCompiler
-The U-SQL local compiler class
-
-**Constructor**
-
-public LocalCompiler(Configuration configuration)
-
-|Parameter|Type|Description|
-|---------|----|-----------|
-|configuration|Microsoft.Analytics.LocalRun.Configuration||
-
-**Method**
-
-public bool Compile(
-	string script,
-	string filePath,
-	bool shallow,
-	out CommonCompileResult result
-)
-
-|Parameter|Type|Description|
-|---------|----|-----------|
-|script|System.String|string of the input script|
-|filePath|System.String|path of the script file, set to null to use default|
-|shallow|System.Boolean|shallow compile (syntax verification only) or full compile|
-|result|Microsoft.Cosmos.ClientTools.Shared.CommonCompileResult|Detailed compilation results|
-|Return Value|System.Boolean|true: no severe error in compilation. <br>false: severe error in compilation|
-
-#### Microsoft.Analytics.LocalRun.LocalRunner : IDisposable
-The U-SQL local runner class
-
-**Constructor**
-
-public LocalRunner(
-	string algebraFilePath,
-	string dataRoot,
-	Action<string> postMessage = null
-)
-
-|Parameter|Type|Description|
-|---------|----|-----------|
-|algebraFilePath|System.String|Path to Algebra file|
-|dataRoot|System.String|Path to DataRoot|
-|postMessage (Optional)|System.Action<String>|logging handler for progress|
-
-public LocalRunner(
-	string algebraFilePath,
-	string dataRoot,
-	string cachePath,
-	string runtimePath,
-	string tempPath,
-	string logPath,
-	Action<Object, ExecutionStatusBase. ExecutionEventArgs> execEventHandler,
-	Object eventContext,
-	Action<string> postMessage = null
-)
-
-|Parameter|Type|Description|
-|---------|----|-----------|
-|algebraFilePath|System.String|Path to Algebra file|
-|dataRoot|System.String|Path to DataRoot|
-|cachePath|System.String|Path to directory of compilation result, set to null to use default where Algebra file is located|
-|runtimePath|System.String|Path to directory of shadow copied runtime, set to null to use default where parent directory of cachePath|
-|tempPath|System.String|Temporary storage path, internal use only, set to null|
-|logPath|System.String|Path where execution logs will be written to, set to null to use default as cachePath|
-|execEventHandler|System. Action<Object, ExecutionStatusBase.ExecutionEventArgs>|execution status change event notification handler|
-|eventContext|System. Object|context to the event handler|
-|postMessage (Optional)|System.Action<String>|logging handler for progress|
-
-**Properties**
-
-|Name|Description|
-|----|-----------|
-|AlgebraPath|Path to the algebra file|
-|CachePath|The compiler result cache path where generated binaries are located|
-|CompletedSteps|Number of completed steps|
-|DataRoot|DataRoot for metadata|
-|LastErrorMessage|(Inherited from ExecutionStatusBase.)|
-|LogPath|Logging file storage location Setter will create the directory if inexist Previously created log path will not be cleaned|
-|OutputHeader|Dump schema header in textual outputs|
-|Parallelism|Parallelism, default to logic processors - 1 Changing this after Start will results in an Exception|
-|Progress|Execution progress in 0 to 100 percent scale|
-|RuntimePath|Where the runtime files are located, must be one directory above CachePath when it is the shadow copy by compiler|
-|Status|Execution status <br>enum ExecutionStatusBase.ExecutionStatus <br>{ <br>Initialized, // initialize <br>Running,     // it is running,  WaitOne only check the event in this state <br>Success,     // it completed successfully <br>Error,       // it failed <br>}|
-|TotalSteps|Total number of steps to run, valid value available only after the vertex DAG is built|
-|Verbose|Verbose during execution|
-
-**Method**
-
-|Method|Description|
-|------|-----------|
-|Cancel()|Cancel the running algebra <br>Return Value <br>Type: Boolean <br>false: failed to cancel due to error, check LastErrorMessage for details|
-|Start()|Start to run the algebra <br>Return Value <br>Type: Boolean <br>false: failed to start due to error, check LastErrorMessage for details|
-|WaitOne() <br>WaitOne(Int32) <br>WaitOne(TimeSpan) <br>WaitOne(Int32, Boolean) <br>WaitOne(TimeSpan, Boolean)|Wait for completion, refer to WaitHandle.WaitOne|
-|Dispose()||
-
-
-## See Also
-
-* To get an overview of Data Lake Analytics, see [Azure Data Lake Analytics overview](data-lake-analytics-overview.md).
-* To get started developing U-SQL applications, see [Develop U-SQL scripts using Data Lake Tools for Visual Studio](data-lake-analytics-data-lake-tools-get-started.md).
-* To learn U-SQL, see [Get started with Azure Data Lake Analytics U-SQL language](data-lake-analytics-u-sql-get-started.md).
-* For management tasks, see [Manage Azure Data Lake Analytics using Azure portal](data-lake-analytics-manage-use-portal.md).
-* To log diagnostics information, see [Accessing diagnostics logs for Azure Data Lake Analytics](data-lake-analytics-diagnostic-logs.md)
-* To see a more complex query, see [Analyze Website logs using Azure Data Lake Analytics](data-lake-analytics-analyze-weblogs.md).
-* To view job details, see [Use Job Browser and Job View for Azure Data lake Analytics jobs](data-lake-analytics-data-lake-tools-view-jobs.md)
-* To view use vertex execution view, see [Use the Vertex Execution View in Data Lake Tools for Visual Studio](data-lake-analytics-data-lake-tools-use-vertex-execution-view.md)
+- [How to set up a CI/CD pipeline for Azure Data Lake Analytics](data-lake-analytics-cicd-overview.md).
+- [How to test your Azure Data Lake Analytics code](data-lake-analytics-cicd-test.md).
